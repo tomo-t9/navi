@@ -257,7 +257,7 @@ const orderMakers = [
     "パナソニック", "安川電機", "山洋電気", "新電元工業", "田淵電機(ダイヤゼブラ電機)"
 ];
 
-// ボス＆高瀬さんから共有された本物のパワポURLマッピング（新規リンクを全面統合！）
+// ボス＆高瀬さんから共有された本物のパワポURLマッピング
 const manualUrls = {
     "HUAWEI": "https://ergitsol.sharepoint.com/:p:/r/sites/TechnicalSupport/Shared%20Documents/%E8%A8%AD%E7%BD%AE%E3%83%9E%E3%83%8B%E3%83%A5%E3%82%A2%E3%83%AB/Lite/%E3%82%BD%E3%83%BC%E3%83%A9%E3%83%BC%E3%83%A2%E3%83%8B%E3%82%BF%E3%83%BC%E6%A9%9F%E5%99%A8%E8%A8%AD%E7%BD%AE%E6%96%B9%E6%B3%95_Lite_LTE_HUAWEI_FG%EF%BC%88VPN%EF%BC%89_v3.pptx?d=w7fe796cd80834579a20b27e3b4d81a01&csf=1&web=1&e=fGjsvW",
     "HUAWEI_no_logger": "https://ergitsol.sharepoint.com/:p:/r/sites/TechnicalSupport/Shared%20Documents/%E8%A8%AD%E7%BD%AE%E3%83%9E%E3%83%8B%E3%83%A5%E3%82%A2%E3%83%AB/Lite/%E3%82%BD%E3%83%BC%E3%83%A9%E3%83%BC%E3%83%A2%E3%83%8B%E3%82%BF%E3%83%BC%E6%A9%9F%E5%99%A8%E8%A8%AD%E7%BD%AE%E6%96%B9%E6%B3%95_Lite_LTE_HUAWEI4.95kW%E7%94%A8%20Smartlogger%E7%84%A1_V4.pptx?d=w20853c92c52147b6a24f1f5518222cb3&csf=1&web=1&e=jOlnYL",
@@ -271,7 +271,6 @@ const manualUrls = {
     "Tabuchi_1phase": "https://ergitsol.sharepoint.com/:p:/r/sites/TechnicalSupport/Shared%20Documents/%E8%A8%AD%E7%BD%AE%E3%83%9E%E3%83%8B%E3%83%A5%E3%82%A2%E3%83%AB/Lite/%E3%82%BD%E3%83%BC%E3%83%A9%E3%83%BC%E3%83%A2%E3%83%8B%E3%82%BF%E3%83%BC%E6%A9%9F%E5%99%A8%E8%A8%AD%E7%BD%AE%E6%96%B9%E6%B3%95_Lite_LTE_%E7%94%B0%E6%B7%B5%E9%9B%BB%E6%A9%9F%EF%BC%88%E5%83%85%E7%9B%B8%EF%BC%89_v3.pptx?d=w0dceaec422774cde9c120f5feab0a720&csf=1&web=1&e=sAXWvp",
     "Suntech": "https://ergitsol.sharepoint.com/:p:/r/sites/TechnicalSupport/Shared%20Documents/%E8%A8%AD%E7%BD%AE%E3%83%9E%E3%83%8B%E3%83%A5%E3%82%A2%E3%83%AB/Lite/%E3%82%BD%E3%83%BC%E3%83%A9%E3%83%BC%E3%83%A2%E3%83%8B%E3%82%BF%E3%83%BC%E6%A9%9F%E5%99%A8%E8%A8%AD%E7%BD%AE%E6%96%B9%E6%B3%95_Lite_LTE_%EF%BD%BB%EF%BE%9D%EF%BE%83%EF%BD%AF%EF%BD%B8_%EF%BE%8A%EF%BE%9F%EF%BE%85%EF%BD%BF%EF%BE%86%EF%BD%AF%EF%BD%B8_%EF%BE%98%EF%BD%B0%EF%BE%8C%EF%BE%9F%EF%BE%84%EF%BE%9D_%EF%BE%88%EF%BD%B8%EF%BD%BD%EF%BE%84%EF%BD%B4%EF%BE%85%EF%BD%BC%EF%BE%9E%EF%BD%B0.FG_v3.pptx?d=w35aee813ea3340ddaf8d55181e5f91e1&csf=1&web=1&e=0DDYg0",
     
-    // 👇 高瀬さんから新しく共有された直リンクパワポURLを追加！
     "ABB": "https://ergitsol.sharepoint.com/:p:/r/sites/egypt/Shared%20Documents/Solar%20Monitor/%E5%87%BA%E8%8D%B7%E7%AE%A1%E7%90%86%E8%A1%A8/%E8%A8%AD%E7%BD%AE%E3%83%9E%E3%83%8B%E3%83%A5%E3%82%A2%E3%83%AB(ESI)/%E8%A8%AD%E7%BD%AE%E3%83%9E%E3%83%8B%E3%83%A5%E3%82%A2%E3%83%AB%EF%BC%88%E3%83%A1%E3%83%BC%E3%82%AB%E3%83%BC%E5%88%A5%EF%BC%89/ABB/ABB%EF%BC%88%E3%82%A4%E3%83%BC%E3%82%B5%E3%83%8D%E3%83%83%E3%83%88%EF%BC%89_%E3%83%97%E3%83%A1%E3%83%A2%E3%83%A1_BOX%E7%84%A1.pptx?d=w491833e4153d4f25b1a7bee34ced0208&csf=1&web=1&e=Hy4bnr",
     "IDEC": "https://ergitsol.sharepoint.com/:p:/r/sites/egypt/Shared%20Documents/Solar%20Monitor/%E5%87%BA%E8%8D%B7%E7%AE%A1%E7%90%86%E8%A1%A8/%E8%A8%AD%E7%BD%AE%E3%83%9E%E3%83%8B%E3%83%A5%E3%82%A2%E3%83%AB(ESI)/%E8%A8%AD%E7%BD%AE%E3%83%9E%E3%83%8B%E3%83%A5%E3%82%A2%E3%83%AB%EF%BC%88%E3%83%A1%E3%83%BC%E3%82%AB%E3%83%BC%E5%88%A5%EF%BC%89/IDEC/IDEC_Pro_BOX%E6%9C%89.pptx?d=we70941361af8459097e0ac2998ad498b&csf=1&web=1&e=SV3XPt",
     "SolarEdge": "https://ergitsol.sharepoint.com/:p:/r/sites/egypt/Shared%20Documents/Solar%20Monitor/%E5%87%BA%E8%8D%B7%E7%AE%A1%E7%90%86%E8%A1%A8/%E8%A8%AD%E7%BD%AE%E3%83%9E%E3%83%8B%E3%83%A5%E3%82%A2%E3%83%AB(ESI)/%E8%A8%AD%E7%BD%AE%E3%83%9E%E3%83%8B%E3%83%A5%E3%82%A2%E3%83%AB%EF%BC%88%E3%83%A1%E3%83%BC%E3%82%AB%E3%83%BC%E5%88%A5%EF%BC%89/SolarEdge/SolarEdge%EF%BC%88%E6%96%B0%E5%9E%8B%E7%95%AA%EF%BC%89_Lite_BOX%E6%9C%89.pptx?d=w09a8a4ce60674c5fa19099b65afa2f36&csf=1&web=1&e=5lVtip",
@@ -319,7 +318,6 @@ function renderOrderMakerSelection(stepNum) {
     node.className = 'node';
     let buttonsHtml = '<div class="grid-buttons">';
     orderMakers.forEach(maker => {
-        // 👇 「※Webコネクト必須」の部分だけを抽出して赤色にスタイル指定するロジック
         let displayHtml = maker;
         if (maker.includes("※Webコネクト必須")) {
             displayHtml = maker.replace("※Webコネクト必須", '<span style="color: var(--alert-color); font-weight: bold;">※Webコネクト必須</span>');
@@ -340,7 +338,6 @@ function selectOrderMaker(stepNum, maker) {
     highlightButton(maker);
     clearSubsequentSteps(stepNum);
     
-    // 複数リンクが存在するメーカーの場合は、まず「仕様別の選択ボタン」を出す
     if (maker === "HUAWEI" || maker === "HUAWEI（スマートロガーあり）") {
         renderHuaweiSpecSelection(stepNum, maker);
     } else if (maker.includes("SMA")) {
@@ -350,10 +347,10 @@ function selectOrderMaker(stepNum, maker) {
     } else if (maker === "田淵電機(ダイヤゼブラ電機)") {
         renderTabuchiSpecSelection(stepNum, maker);
     } else {
-        // 単一マニュアル、またはこれからマニュアルを登録するメーカー
         let key = maker;
         if (maker === "ダイヤモンド電機") key = "Diamond_elec";
         if (maker === "サンテックパワー") key = "Suntech";
+        if (maker === "山洋電気") key = "山洋電気";
         openManualAndRenderResult(stepNum, maker, key);
     }
 }
@@ -377,7 +374,6 @@ function renderHuaweiSpecSelection(stepNum, maker) {
 function renderSmaSpecSelection(stepNum, maker) {
     const node = document.createElement('div');
     node.className = 'node';
-    // 次画面のラベルでも赤文字を維持
     let displayMaker = maker;
     if (maker.includes("※Webコネクト必須")) {
         displayMaker = maker.replace("※Webコネクト必須", '<span style="color: var(--alert-color); font-weight: bold;">※Webコネクト必須</span>');
@@ -423,31 +419,33 @@ function renderTabuchiSpecSelection(stepNum, maker) {
     appendNode(node);
 }
 
-// パワポURLを開き、同時にチェックリストを表示するコア関数
+// パワポURLチェックとチェックリストを表示するコア関数
 function openManualAndRenderResult(stepNum, makerName, urlKey) {
-    // 高瀬さんに共有していただいたSharePointメーカー別親フォルダURL
-    const baseFolderUrl = "https://ergitsol.sharepoint.com/:f:/r/sites/egypt/Shared%20Documents/Solar%20Monitor/%E5%87%BA%E8%8D%B7%E7%AE%A1%E7%90%86%E8%A1%A8/%E8%A8%AD%E7%BD%AE%E3%83%9E%E3%83%8B%E3%83%A5%E3%82%A2%E3%83%AB(ESI)/%E8%A8%AD%E7%BD%AE%E3%83%9E%E3%83%8B%E3%83%A5%E3%82%A2%E3%83%AB%EF%BC%88%E3%83%A1%E3%83%BC%E3%82%AB%E3%83%BC%E5%88%A5%EF%BC%89?csf=1&web=1&e=k5dqr0";
     const url = manualUrls[urlKey];
     
-    // 直リンクURLがあればそれを、なければ高瀬さん指定のメーカー別SharePointフォルダを自動で開く
-    const targetUrl = url ? url : baseFolderUrl;
-    window.open(targetUrl, '_blank');
+    // 🚨 直リンクでの強制window.open自動起動を完全に削除しました！
 
     const node = document.createElement('div');
     node.className = 'node';
     
-    // 結果タイトルでも赤文字を維持
     let displayMakerName = makerName;
     if (makerName.includes("※Webコネクト必須")) {
         displayMakerName = makerName.replace("※Webコネクト必須", '<span style="color: var(--alert-color); font-weight: bold;">※Webコネクト必須</span>');
     }
-    let title = `【${displayMakerName}】標準手配セット要件`;
-    let contentHtml = "";
     
+    let title = "";
+    let contentHtml = "";
+    let boxStyle = "";
+    let titleStyle = "";
+    
+    // リンクが登録されている場合
     if (url) {
+        title = `【${displayMakerName}】標準手配セット要件`;
+        boxStyle = "border-left: 4px solid var(--success-color); background-color: rgba(46, 164, 79, 0.1);";
+        titleStyle = "color: var(--success-color);";
         contentHtml = `
-            <p style="color: var(--success-color); font-weight: bold;">🚀 画面裏の別タブで対象の設置マニュアル（パワーポイント）を自動起動しました！</p>
-            <p>開かない場合は、最下部の参照資料リンクから直接閲覧してください。マニュアル記載の基本部材リストです：</p>
+            <p style="color: var(--success-color); font-weight: bold;">📄 対象のマニュアル（パワーポイント）のリンクが正常に生成されました。</p>
+            <p>下部にある緑色のリンクボタンをクリックして資料を閲覧してください。マニュアル指定の基本部材リストです：</p>
             <ul class="order-list">
                 <li>🔳 <b>対象メーカー パワーコンディショナ本体</b></li>
                 <li>🔳 <b>専用DCコネクタプラグ一式</b> (マニュアル指定個数)</li>
@@ -457,26 +455,24 @@ function openManualAndRenderResult(stepNum, makerName, urlKey) {
             </ul>
         `;
     } else {
+        // 🚨 リンクがない場合は綺麗に「準備中」のカードを出すように変更！
+        title = `【${displayMakerName}】マニュアル準備中`;
+        boxStyle = "border-left: 4px solid var(--warning-color); background-color: rgba(255, 158, 59, 0.1);";
+        titleStyle = "color: var(--warning-color);";
         contentHtml = `
-            <p style="color: var(--accent-color); font-weight: bold;">📂 画面裏の別タブでSharePointの「設置マニュアル（メーカー別）」フォルダを自動起動しました！</p>
-            <p>起動したフォルダの中から「<b>${makerName}</b>」用の最新資料に沿って、必須部材に漏れがないか二重チェックをしてください。</p>
-            <ul class="order-list">
-                <li>🔳 <b>対象メーカー パワーコンディショナ本体</b></li>
-                <li>🔳 <b>専用DCコネクタプラグ一式</b></li>
-                <li>🔳 <b>専用ゲートウェイ / 通信部材一式</b></li>
-                <li>🔳 <b>その他メーカー指定の必須部材</b></li>
-            </ul>
+            <p style="color: var(--warning-color); font-weight: bold;">💡 このメーカーのマニュアル（パワーポイント）は現在準備中です。</p>
+            <p>手配を進める際は、社内共有の最新資料や、発注先マニュアルに沿って必須部材に漏れがないか手動で二重チェックをお願いします。</p>
         `;
     }
 
     node.innerHTML = `
-        <div class="label" style="color:var(--success-color);">${urlKey} ORDER SPEC SYSTEM</div>
-        <div class="result-box">
-            <div class="result-title">${title}</div>
+        <div class="label" style="color:${url ? 'var(--success-color)' : 'var(--warning-color)'};">${url ? urlKey + ' ORDER SPEC SYSTEM' : 'SYSTEM NOTICE'}</div>
+        <div class="result-box" style="${boxStyle}">
+            <div class="result-title" style="${titleStyle}">${title}</div>
             ${contentHtml}
         </div>
         <div class="doc-reference">
-            <p><strong>自動連携資料:</strong> <a href="${targetUrl}" target="_blank">${url ? "🔗 個別マニュアル（パワポ）を直接開く" : "📂 SharePoint メーカー別フォルダを開く"}</a></p>
+            <p><strong>自動連携資料:</strong> ${url ? `<a href="${url}" target="_blank" style="background-color: var(--success-color); color: white; padding: 6px 12px; border-radius: 4px; text-decoration: none; display: inline-block; margin-top: 5px; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">🔗 マニュアル（パワポ）を開く</a>` : `<span style="color: #8b949e; font-style: italic;">準備中 (リンク未登録)</span>`}</p>
             <p><strong>管理区分:</strong> 厳選24パターン手配・発注自動化モジュール</p>
         </div>
     `;
