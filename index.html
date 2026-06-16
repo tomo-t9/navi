@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>マルチPCS＆監視障害対応切り分けナビゲーター</title>
+    <style>
+        :root {
+            --bg-color: #0d1117;
+            --card-bg: #161b22;
+            --text-color: #c9d1d9;
+            --accent-color: #58a6ff;
+            --success-color: #2ea44f;
+            --alert-color: #f85149;
+            --warning-color: #ff9e3b;
+            --border-color: #30363d;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 650px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--accent-color);
+            font-size: 1.8rem;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px rgba(88, 166, 255, 0.3);
+        }
+
+        .node {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 25px;
+            position: relative;
+            animation: fadeIn 0.4s ease-out forwards;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+
+        .node:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            bottom: -26px;
+            left: 50%;
+            width: 2px;
+            height: 25px;
+            background: linear-gradient(to bottom, var(--accent-color), transparent);
+        }
+
+        .label {
+            font-size: 0.8rem;
+            color: var(--accent-color);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .question {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .grid-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 8px;
+            width: 100%;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 12px;
+            background-color: #0d1117;
+            border: 1px solid var(--accent-color);
+            border-radius: 6px;
+            color: #fff;
+            font-size: 1rem;
+            box-sizing: border-box;
+            margin-bottom: 15px;
+        }
+        .search-box:focus {
+            outline: none;
+            box-shadow: 0 0 10px rgba(88, 166, 255, 0.5);
+        }
+
+        .search-results {
+            max-height: 280px;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background: #1f242c;
+        }
+        .search-item {
+            padding: 10px 15px;
+            cursor: pointer;
+            border-bottom: 1px solid var(--border-color);
+            transition: background 0.2s;
+            font-size: 0.95rem;
+        }
+        .search-item:last-child { border-bottom: none; }
+        .search-item:hover {
+            background-color: rgba(88, 166, 255, 0.15);
+            color: #fff;
+        }
+        .no-result {
+            padding: 15px;
+            color: #8b949e;
+            text-align: center;
+            font-style: italic;
+        }
+
+        button {
+            background-color: transparent;
+            border: 1px solid var(--accent-color);
+            color: var(--accent-color);
+            padding: 10px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s ease;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+
+        button:hover {
+            background-color: rgba(88, 166, 255, 0.1);
+            box-shadow: 0 0 8px rgba(88, 166, 255, 0.4);
+            transform: translateY(-1px);
+        }
+
+        button.selected {
+            background-color: var(--accent-color);
+            color: var(--bg-color);
+        }
+
+        .check-list {
+            margin-top: 10px;
+            padding-left: 20px;
+        }
+        .check-list li {
+            margin-bottom: 5px;
+            color: var(--warning-color);
+            font-weight: bold;
+        }
+
+        .danger-text {
+            color: var(--alert-color);
+            font-weight: bold;
+        }
+
+        .result-box {
+            border-left: 4px solid var(--success-color);
+            background-color: rgba(46, 164, 79, 0.1);
+            padding: 15px;
+            border-radius: 0 8px 8px 0;
+            margin-top: 10px;
+        }
+
+        .result-title {
+            color: var(--success-color);
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin-bottom: 8px;
+        }
+
+        .doc-reference {
+            background-color: rgba(255, 255, 255, 0.05);
+            border: 1px dashed var(--border-color);
+            padding: 12px;
+            margin-top: 10px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+        .doc-reference p { margin: 4px 0; }
+
+        .reset-btn {
+            display: block;
+            margin: 30px auto 0;
+            border-color: var(--alert-color);
+            color: var(--alert-color);
+        }
+        .reset-btn:hover {
+            background-color: rgba(248, 81, 73, 0.1);
+            box-shadow: 0 0 8px rgba(248, 81, 73, 0.4);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Triage Navigator</h1>
+
+    <div id="flow-container">
+        <div class="node" id="step1">
+            <div class="label">START</div>
+            <div class="question">何に異常が発生していますか？</div>
+            <div class="btn-group">
+                <button onclick="selectTarget(1, 'PCS')">PCS</button>
+                <button onclick="selectTarget(1, '監視機器')">監視機器</button>
+            </div>
+        </div>
+    </div>
+    
+    <button class="reset-btn" onclick="resetFlow()" style="display:none;" id="reset-btn">最初からやり直す</button>
+</div>
+
+<script>
+const manufacturers = ["HUAWEI", "デルタ電子", "オムロン", "ダイヤゼブラ電機", "安川電機"];
+
+// マスターエラーデータベース
+const masterAlarms = {
+    "HUAWEI": {
+        "2001": { name: "2001 ストリング電圧高", title: "【HUAWEI】PVアレイの直列接続構成の確認", text: "DCスイッチがONの場合、PVストリングの直列接続構成を確認してください。最大開放電圧が装置の最大動作電圧を超えている可能性があります。" },
+        "2002": { name: "2002 DCアークの故障", title: "【HUAWEI】PVストリングの火災・接触不良の点検", text: "PVストリングケーブルでアーク放電または接触不良が発生しています。異常のあるMPPT/ストリングを特定し、発火の痕跡、端子の接触不良を確認・修理してください。" },
+        "2009": { name: "2009 ストリングの地絡", title: "【HUAWEI】対地抵抗の測定とDCスイッチ状態確認", text: "プラス/マイナスのPVケーブルを取り外し、絶縁抵抗計を使用して各PVケーブルの対地抵抗を順に測定、破損箇所を特定し修正してください。" },
+        "2010": { name: "2010 DC入力異常", title: "【HUAWEI】DCスイッチ操作と接続確認要件", text: "動作中に[OFF]になっているDC SWITCHがある場合、スイッチを直接オンにしないでください。\n【スイッチをONにするシーケンス】\n① [AUX SWITCH]を手動でONにする ➔ ② 約1分待ち、PVインジケータ点灯後、すべての[DC SWITCH]を手動でONにする ➔ ③ [AUX SWITCH]を手動でOFFにする。" },
+        "2032": { name: "2032 電力系統の故障", title: "【HUAWEI】AC電圧および遮断器の確認", text: "電力系統の供給停止、またはAC回路の切断・遮断器OFFの可能性があります。AC電圧が正常か確認してください。" },
+        "2034": { name: "2034 電力系統過電圧", title: "【HUAWEI】系統電圧の確認と保護閾値の調整", text: "電力系統の線間電圧が上限閾値を超えています。頻繁に発生する場合は系統電圧が許容範囲内か確認し、範囲外なら電力事業者にネゴシエーションしてください。" },
+        "2062": { name: "2062 低絶縁抵抗", title: "【HUAWEI】PVアレイ対地インピーダンスの特定", text: "PVアレイと接地間の短絡、または湿気による絶縁不良です。PEケーブルの接続を確認し、PVアレイ出力の対地インピーダンスを確認してください。" },
+        "2064": { name: "2064 デバイスの異常", title: "【HUAWEI】内部回路故障時の厳禁事項", text: "内部重故障。オフになっているDC SWITCHがあっても、ACスイッチやDCスイッチを絶対にONにしないでください！リセットコマンドも発行せず、同日にDC電流が0.01A未満に低下するのを待ってAC/DCをOFFにし、販売店または技術サポートへ連絡してください。" }
+    },
+    "安川電機": {
+        "E0001": { name: "E0001 ヒューズ溶断", title: "【安川】主回路ヒューズ溶断の確認", text: "パワーコンディショナ出力側の短絡、地絡によって出力トランジスタが破壊された可能性があります。パワーコンディショナを交換する必要があります。" },
+        "E0006": { name: "E0006 系統地絡", title: "【安川】出力側AC配線の短絡・地絡点検", text: "パワーコンディショナ出力側で地絡が発生しました。\n【処置】MCCB1, MCCB2を完全にOFFにし、5分以上経過してチャージランプが消灯したことを確認後、端子カバーを取り外して配線ミスやAC集電箱から系統連系点までのケーブル破損・接触がないか点検してください。再投入前に短絡・地絡がないことを必ず実測確認してください。" },
+        "E0010": { name: "E0010 内部温度異常", title: "【安川】吸排気フィルタの閉塞および冷却ファン確認", text: "装置内部またはコントロール基板が過熱しています。本体底面の入気フィルタ、側面のファンカバーに目詰まりがないか確認し、清掃を実施してください。" },
+        "E0086": { name: "E0086 入力遮断(直流過電圧)", title: "【安川】直流入力電圧の限界超過チェック", text: "太陽電池電圧が過電圧検出レベルを超えたため、保護機能により【太陽電池入力ブレーカ（MCCB1）がトリップ】しました。構成を再点検してください。" },
+        "E0088": { name: "E0088 入力遮断(直流地絡)", title: "【安川】直流入力側の地絡（漏電）点検", text: "パワーコンディショナ入力側で直流地絡を検出したため、【太陽電池入力ブレーカ（MCCB1）がトリップ】しました。対地絶縁抵抗を測定してください。" },
+        "E0108": { name: "E0108 系統過電圧1 (OVR)", title: "【安川】系統AC電圧の上昇および保護リセット確認", text: "系統過電圧（OVR）保護が作動しました。手動での異常リセット操作（操作パネルの「表示切替キー」を約3秒間長押し）を行ってください。" }
+    },
+    "オムロン": {
+        "E1-0.0": { name: "E1-0.0 停電 / ブレーカーOFF", title: "【オムロン】停電の発生、または太陽光発電用ブレーカの確認", text: "停電が発生しているか、太陽光発電用ブレーカが「オフ」になっています。停電回復を待つか、太陽光発電用ブレーカを「オン」にしてください。※運転中およびブレーカオフ後3分間は端子に絶対に触らないでください！" },
+        "E1-1.0": { name: "E1-1.0 交流過電圧検出", title: "【オムロン】商用系統の電圧上昇抑制確認", text: "商用系統の電圧が上昇しました。商用系統の電圧が正常に戻ると、自動的に運転を再開します。表示部に「抑制」が点灯していないか確認してください。" },
+        "E2-3.0": { name: "E2-3.0 直流地絡検出", title: "【オムロン】太陽電池側絶縁抵抗測定と該当ストリング切り離し", text: "太陽電池側の機器の絶縁抵抗が低下しています。入力開閉器をすべて「オフ」にし、各ストリングのP-E間、N-E間の絶縁抵抗をDC500Vメガテスタで測定してください（合格範囲：0.2MΩ以上）。" }
+    },
+    "デルタ電子": {
+        "GE10": { name: "GE10 系統不足電圧", title: "【デルタ】専用ブレーカーおよび系統AC電圧確認", text: "系統の電圧が低い状態です。家庭用分電盤の太陽光発電システム専用ブレーカーが \"OFF\" になっていないか確認し、\"OFF\" であれば \"ON\" にしてください。" },
+        "GF24": { name: "GF24 直流地絡", title: "【デルタ】太陽電池側地絡の検出と特定手順", text: "太陽電池側の地絡を検出しました。「直流側開閉器」を \"OFF\" にして、各端子とアース端子間をDC500Vメガテスターで測定し、合格範囲（1MΩ以上）を満たさない回路を特定してください。" }
+    },
+    "ダイヤゼブラ電機": {
+        "G-01": { name: "G-01 系統過電圧", title: "【ダイヤゼブラ】商用電源異常（過電圧）の検知", text: "商用電源の過電圧異常を検知しました。正常に戻ってから約5分で運転を再開します。※故障復帰方法をMANUALへ変更している場合は、手動復帰操作が必要です。" },
+        "E-07": { name: "E-07 直流地絡（ISO異常）", title: "【ダイヤゼブラ】直流ラインの漏電特定", text: "太陽電池側で地絡を検出。全ストリングを抜き、メガーにて各入力ラインの対地絶縁を確認してください。" }
+    }
+};
+
+let selectedTarget = "";
+let selectedMaker = "";
+
+function selectTarget(stepNum, target) {
+    highlightButton(target);
+    clearSubsequentSteps(stepNum);
+    selectedTarget = target;
+
+    if (target === 'PCS') {
+        renderMakerSelection(stepNum + 1);
+    } else {
+        // 監視機器ルート：Ping確認からスタート
+        renderPingCheck(stepNum + 1);
+    }
+}
+
+// --- 監視機器専用ルート ---
+
+function renderPingCheck(stepNum) {
+    const node = document.createElement('div');
+    node.className = 'node';
+    node.innerHTML = `
+        <div class="label">監視機器: STEP 1</div>
+        <div class="question">対象の監視機器への「Ping（疎通確認）」の結果はどうですか？</div>
+        <div class="btn-group">
+            <button onclick="selectPingStatus(${stepNum}, 'OK')">Ping OK</button>
+            <button onclick="selectPingStatus(${stepNum}, 'NG')">Ping NG</button>
+        </div>
+    `;
+    appendNode(node);
+}
+
+function selectPingStatus(stepNum, status) {
+    highlightButton(status === 'OK' ? "Ping OK" : "Ping NG");
+    clearSubsequentSteps(stepNum);
+
+    if (status === 'OK') {
+        // Ping OK ➔ PCSとの通信確認へ
+        renderPcsCommCheck(stepNum + 1);
+    } else {
+        // Ping NG ➔ 停電・落雷情報確認の上、駆け付け手配（完了）
+        renderResult(stepNum + 1, "【判断】停電・落雷情報の確認および駆け付け手配", 
+            `<span class='danger-text'>監視機器の完全なダウン状態です。</span><br>
+            1. 周辺地域で「停電」や「落雷」が発生していないか、電力会社の情報等を確認してください。<br>
+            2. リモートでの復旧は不可能なため、現地でのルーター・ロガーの電源確認、機器交換等を視野に入れた<b style="color:var(--warning-color);">「現地駆け付け」の手配</b>を直ちに開始してください。`);
+    }
+}
+
+function renderPcsCommCheck(stepNum) {
+    const node = document.createElement('div');
+    node.className = 'node';
+    node.innerHTML = `
+        <div class="label">監視機器: STEP 2</div>
+        <div class="question">ネットワークは生きています。PCS（パワコン）との通信データは取れていますか？</div>
+        <div class="btn-group">
+            <button onclick="selectPcsCommStatus(${stepNum}, 'data_ok')">データが取れている</button>
+            <button onclick="selectPcsCommStatus(${stepNum}, 'data_ng')">通信不通（データが取れていない）</button>
+        </div>
+    `;
+    appendNode(node);
+}
+
+function selectPcsCommStatus(stepNum, status) {
+    highlightButton(status === 'data_ok' ? "データが取れている" : "通信不通（データが取れていない）");
+    clearSubsequentSteps(stepNum);
+
+    if (status === 'data_ok') {
+        // データが取れている ➔ ①PCSは稼働している？ルートへ
+        renderPcsRunningCheck(stepNum + 1);
+    } else {
+        // 通信不通 ➔ ②PCSにcmdを送ってどうか
+        renderSendCmdCheck(stepNum + 1);
+    }
+}
+
+// ① データが取れている場合の選択
+function renderPcsRunningCheck(stepNum) {
+    const node = document.createElement('div');
+    node.className = 'node';
+    node.innerHTML = `
+        <div class="label">監視機器: STEP 3 (データあり)</div>
+        <div class="question">取得できているデータから見て、PCS（パワコン）は稼働していますか？</div>
+        <div class="btn-group">
+            <button onclick="goToPcsFlow(${stepNum})">PCSは稼働（エラー・アラート等の精査へ）</button>
+            <button onclick="selectNoAlertRoute(${stepNum}, 'stop')">PCSは停止状態（発電量0）</button>
+        </div>
+    `;
+    appendNode(node);
+}
+
+// ② 通信不通の場合の選択
+function renderSendCmdCheck(stepNum) {
+    const node = document.createElement('div');
+    node.className = 'node';
+    node.innerHTML = `
+        <div class="label">監視機器: STEP 3 (通信不通)</div>
+        <div class="question">状況確認・復旧のため、対象PCSに「cmd（コマンド：Ping/再接続指示）」を送信しました。結果は？</div>
+        <div class="btn-group">
+            <button onclick="renderResult(${stepNum + 1}, '【復旧】通信の回復確認', 'cmd送信によりPCSとの通信が復旧しました。テレメトリデータが正常に更新され始めたか、遠隔画面で監視を継続してください。')">cmd送信で復旧した</button>
+            <button onclick="selectNoAlertRoute(${stepNum}, 'comm_fail')">cmdを送信しても応答なし（NG）</button>
+        </div>
+    `;
+    appendNode(node);
+}
+
+// PCSのフローへ移行するジャンプ機能
+function goToPcsFlow(stepNum) {
+    clearSubsequentSteps(stepNum);
+    // PCS選択画面（STEP 1）を模したノードを新しく追加して合流
+    renderMakerSelection(stepNum + 1);
+}
+
+
+// --- 以下、PCS専用・共通ルート（既存ロジックを100%継承） ---
+
+function renderMakerSelection(stepNum) {
+    const node = document.createElement('div');
+    node.className = 'node';
+    let buttonsHtml = '<div class="grid-buttons">';
+    manufacturers.forEach(maker => {
+        buttonsHtml += `<button onclick="selectMaker(${stepNum}, '${maker}')">${maker}</button>`;
+    });
+    buttonsHtml += '</div>';
+
+    node.innerHTML = `
+        <div class="label">PCSフロー合流: メーカー選択</div>
+        <div class="question">調査対象のPCSのメーカーを選択してください。</div>
+        ${buttonsHtml}
+    `;
+    appendNode(node);
+}
+
+function selectMaker(stepNum, maker) {
+    highlightButton(maker);
+    clearSubsequentSteps(stepNum);
+    selectedMaker = maker;
+    
+    if (maker === "HUAWEI") {
+        renderSmartLoggerCheck(stepNum + 1);
+    } else {
+        renderAlertCheck(stepNum + 1);
+    }
+}
+
+function renderSmartLoggerCheck(stepNum) {
+    const node = document.createElement('div');
+    node.className = 'node';
+    node.innerHTML = `
+        <div class="label">HUAWEI専用: SmartLogger確認</div>
+        <div class="question">現地またはシステム内に「SmartLogger」はありますか？</div>
+        <div class="btn-group">
+            <button onclick="selectSmartLogger(${stepNum}, true)">ある</button>
+            <button onclick="selectSmartLogger(${stepNum}, false)">ない</button>
+        </div>
+    `;
+    appendNode(node);
+}
+
+function selectSmartLogger(stepNum, hasLogger) {
+    highlightButton(hasLogger ? "ある" : "ない");
+    clearSubsequentSteps(stepNum);
+
+    if (hasLogger) {
+        const node = document.createElement('div');
+        node.className = 'node';
+        node.innerHTML = `
+            <div class="label">HUAWEI専用: ローカルログイン調査</div>
+            <div class="question">PC等を接続し、ローカルでSmartLoggerにログインして現状を確認してください。</div>
+            <p style="margin: 5px 0; color: var(--accent-color); font-weight: bold;">【確認必須項目】</p>
+            <ul class="check-list">
+                <li>① PCS稼働有無</li>
+                <li>② PCS認識有無</li>
+                <li>③ ファームウェアバージョン（Ver）の確認</li>
+            </ul>
+            <div class="btn-group" style="margin-top:15px;">
+                <button onclick="renderAlertCheck(${stepNum + 1})">確認完了（次のステップへ）</button>
+            </div>
+        `;
+        appendNode(node);
+    } else {
+        renderOutputControlCheck(stepNum + 1);
+    }
+}
+
+function renderOutputControlCheck(stepNum) {
+    const node = document.createElement('div');
+    node.className = 'node';
+    node.innerHTML = `
+        <div class="label">HUAWEI専用: 出力制御の確認</div>
+        <div class="question">この現場の出力制御の仕様はどちらですか？</div>
+        <div class="btn-group">
+            <button onclick="selectOutputControl(${stepNum}, 'SR')">出力制御はSR</button>
+            <button onclick="selectOutputControl(${stepNum}, 'OUT')">対象外</button>
+        </div>
+    `;
+    appendNode(node);
+}
+
+function selectOutputControl(stepNum, type) {
+    highlightButton(type === 'SR' ? "出力制御はSR" : "対象外");
+    clearSubsequentSteps(stepNum);
+
+    if (type === 'SR') {
+        renderResult(stepNum + 1, "【要確認】不要ファイルの蓄積チェック", "出力制御がSR仕様かつSmartLoggerがない構成の場合、内部ストレージ等に「不要ファイル」が溜まって動作に影響を与えている可能性があります。クリーンアップ処理を確認してください。");
+    } else {
+        renderAlertCheck(stepNum + 1);
+    }
+}
+
+function renderAlertCheck(stepNum) {
+    const node = document.createElement('div');
+    node.className = 'node';
+    node.innerHTML = `
+        <div class="label">STEP 2: アラート確認</div>
+        <div class="question">選んだ ${selectedMaker || 'PCS'} に「アラート」は出ていますか？</div>
+        <div class="btn-group">
+            <button onclick="selectAlertStatus(${stepNum}, 'yes')">あり</button>
+            <button onclick="selectAlertStatus(${stepNum}, 'no')">なし</button>
+        </div>
+    `;
+    appendNode(node);
+}
+
+function selectAlertStatus(stepNum, status) {
+    highlightButton(status === 'yes' ? "あり" : "なし");
+    clearSubsequentSteps(stepNum);
+
+    if (status === 'yes') {
+        renderSmartSearch(stepNum + 1);
+    } else {
+        renderNoAlertStatusCheck(stepNum + 1);
+    }
+}
+
+function renderNoAlertStatusCheck(stepNum) {
+    const node = document.createElement('div');
+    node.className = 'node';
+    node.innerHTML = `
+        <div class="label">STEP 3: 状態切り分け</div>
+        <div class="question">アラートなしの異常です。現在の詳しい状態はどちらですか？</div>
+        <div class="btn-group">
+            <button onclick="selectNoAlertRoute(${stepNum}, 'stop')">PCSは停止（発電量0）</button>
+            <button onclick="selectNoAlertRoute(${stepNum}, 'comm_fail')">通信不通（監視がオフライン）</button>
+        </div>
+    `;
+    appendNode(node);
+}
+
+function selectNoAlertRoute(stepNum, routeType) {
+    highlightButton(routeType === 'stop' ? "PCSは停止（発電量0）" : "通信不通（監視がオフライン）");
+    clearSubsequentSteps(stepNum);
+
+    let manualSpecs = "";
+    if (selectedMaker === "オムロン") {
+        manualSpecs = "<br><span class='danger-text'>【オムロンマニュアル警告】</span>フロントカバーの取り付け時、ねじを規定のトルク(1.5±0.3N・m)以外で締め付けないでください。電動・インパクトドライバーは厳禁。主回路ねじ締めトルク：出力端子台 2.35±0.35N・m / 入力開閉器 1.8±0.2N・m / アース端子 1.5±0.3N・m。";
+    } else if (selectedMaker === "安川電機") {
+        manualSpecs = "<br><span class='danger-text'>【安川電機マニュアル要件】</span>丸型圧着端子を使用してください。電線は連続最高許容温度75℃の600V2種ビニール絶縁電線推奨。締め付けトルク（一括入力4.9〜6.9N・m、出力2〜2.5N・m、アース3.9〜4.9N・m）を遵守。";
+    } else if (selectedMaker === "ダイヤゼブラ電機") {
+        manualSpecs = "<br><span class='danger-text'>【ダイヤゼブラマニュアル要件】</span>ネジの締め付け不良は火災・端子破損の直接要因となります。確実な手締めを確認。制御信号線と主回路ケーブルはノイズ干渉を防ぐため5cm以上の間隔を開けて敷設してください。";
+    }
+
+    if (routeType === 'stop') {
+        renderResult(stepNum + 1, "【判断】現地確認が必要です", `アラート表示なしでPCS本体が完全に停止している場合、上位の遮断器トリップ、現地手動停止スイッチの誤操作、あるいは内部基盤（制御部電源）の故障などが疑われます。<br><b style="color:var(--warning-color);">現地へ駆け付け、現場盤および外観の状態を確認してください。</b>${manualSpecs}`);
+    } else {
+        renderResult(stepNum + 1, "【アクション】PCSへcmd（コマンド）送信を実施", `PCS自体は動いて発電している可能性がありますが、データロガーやルーターとの通信が途絶えています。<br><b style="color:var(--accent-color);">状況確認のため、遠隔監視システムや保守ツールから対象PCSへ「応答確認（Ping/再接続指示）」のcmdを送信し、テレメトリが復旧するか確認してください。</b>`);
+    }
+}
+
+function renderSmartSearch(stepNum) {
+    const node = document.createElement('div');
+    node.className = 'node';
+    node.innerHTML = `
+        <div class="label">${selectedMaker || 'PCS'}専用: マニュアル同期検索</div>
+        <div class="question">エラーコード（マニュアル通り入力）、またはキーワード（地絡、過電圧、ファン、温度など）を入力してください。</div>
+        <input type="text" class="search-box" id="alarm-search-input" placeholder="例: 地絡、過電圧、E0010、E1-0.0、G-01..." oninput="filterAlarms(${stepNum})">
+        <div class="search-results" id="search-results-list"></div>
+    `;
+    appendNode(node);
+    filterAlarms(stepNum);
+}
+
+function filterAlarms(stepNum) {
+    const input = document.getElementById('alarm-search-input').value.toLowerCase();
+    const resultsContainer = document.getElementById('search-results-list');
+    resultsContainer.innerHTML = '';
+
+    const companyAlarms = masterAlarms[selectedMaker];
+    let matchCount = 0;
+
+    if (companyAlarms) {
+        for (let code in companyAlarms) {
+            const alarmName = companyAlarms[code].name.toLowerCase();
+            if (code.toLowerCase().includes(input) || alarmName.includes(input)) {
+                matchCount++;
+                const item = document.createElement('div');
+                item.className = 'search-item';
+                item.innerText = companyAlarms[code].name;
+                item.onclick = function() {
+                    selectAlarm(stepNum, code);
+                };
+                resultsContainer.appendChild(item);
+            }
+        }
+    }
+
+    if (matchCount === 0) {
+        resultsContainer.innerHTML = `<div class="no-result">${selectedMaker || '対象メーカー'}のマニュアルデータに該当する項目が見つかりません。</div>`;
+    }
+}
+
+function selectAlarm(currentStepNum, code) {
+    clearSubsequentSteps(currentStepNum);
+    const companyAlarms = masterAlarms[selectedMaker];
+    const alarm = companyAlarms[code];
+    document.getElementById('alarm-search-input').value = alarm.name;
+
+    const node = document.createElement('div');
+    node.className = 'node';
+    node.innerHTML = `
+        <div class="label" style="color:var(--success-color);">${selectedMaker} OFFICIAL MANUAL DIAGNOSIS</div>
+        <div class="result-box">
+            <div class="result-title">${alarm.title}</div>
+            <p style="margin: 5px 0 0; line-height: 1.6; white-space: pre-wrap;">${alarm.text}</p>
+        </div>
+        <div class="doc-reference">
+            <p><strong>参照資料:</strong> ${selectedMaker} 公式施工・保守マニュアルデータ完全同期版</p>
+            <p><strong>該当エラー仕様コード:</strong> ${code}</p>
+        </div>
+    `;
+    appendNode(node);
+    document.getElementById('reset-btn').style.display = 'block';
+}
+
+// 共通ヘルパー関数群
+function appendNode(node) {
+    document.getElementById('flow-container').appendChild(node);
+    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+}
+
+function renderResult(stepNum, title, text) {
+    const node = document.createElement('div');
+    node.className = 'node';
+    node.innerHTML = `
+        <div class="label" style="color:var(--success-color);">DIAGNOSIS COMPLETE</div>
+        <div class="result-box">
+            <div class="result-title">${title}</div>
+            <p style="margin: 5px 0 0; line-height: 1.5; white-space: pre-wrap;">${text}</p>
+        </div>
+    `;
+    appendNode(node);
+    document.getElementById('reset-btn').style.display = 'block';
+}
+
+function highlightButton(text) {
+    const currentEvent = window.event;
+    if (currentEvent && currentEvent.target && currentEvent.target.tagName === 'BUTTON') {
+        const buttons = currentEvent.target.parentElement.querySelectorAll('button');
+        buttons.forEach(btn => btn.classList.remove('selected'));
+        currentEvent.target.classList.add('selected');
+    }
+}
+
+function clearSubsequentSteps(currentStepNum) {
+    const container = document.getElementById('flow-container');
+    while (container.children.length > currentStepNum) {
+        container.removeChild(container.lastChild);
+    }
+    document.getElementById('reset-btn').style.display = 'none';
+}
+
+function resetFlow() {
+    const container = document.getElementById('flow-container');
+    while (container.children.length > 1) {
+        container.removeChild(container.lastChild);
+    }
+    const firstBtns = container.querySelectorAll('button');
+    firstBtns.forEach(btn => btn.classList.remove('selected'));
+    document.getElementById('reset-btn').style.display = 'none';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+
+</body>
+</html>
