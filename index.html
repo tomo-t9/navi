@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>マルチPCS＆監視障害対応切り分けナビゲーター</title>
+    <title>マルチPCS・監視・手配 統合管理ナビゲーター (マニュアル直結版)</title>
     <style>
         :root {
             --bg-color: #0d1117;
@@ -28,7 +28,7 @@
         }
 
         .container {
-            max-width: 650px;
+            max-width: 700px;
             width: 100%;
         }
 
@@ -85,7 +85,7 @@
 
         .grid-buttons {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
             gap: 8px;
             width: 100%;
         }
@@ -134,18 +134,19 @@
 
         button {
             background-color: transparent;
-            border: 1px solid var(--accent-color);
-            color: var(--accent-color);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
             padding: 10px 15px;
             border-radius: 6px;
             cursor: pointer;
             font-weight: bold;
             transition: all 0.2s ease;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             text-align: center;
         }
 
         button:hover {
+            border-color: var(--accent-color);
             background-color: rgba(88, 166, 255, 0.1);
             box-shadow: 0 0 8px rgba(88, 166, 255, 0.4);
             transform: translateY(-1px);
@@ -153,6 +154,7 @@
 
         button.selected {
             background-color: var(--accent-color);
+            border-color: var(--accent-color);
             color: var(--bg-color);
         }
 
@@ -164,6 +166,16 @@
             margin-bottom: 5px;
             color: var(--warning-color);
             font-weight: bold;
+        }
+
+        .order-list {
+            margin-top: 12px;
+            padding-left: 20px;
+            color: #fff;
+        }
+        .order-list li {
+            margin-bottom: 8px;
+            line-height: 1.4;
         }
 
         .danger-text {
@@ -195,6 +207,8 @@
             font-size: 0.9rem;
         }
         .doc-reference p { margin: 4px 0; }
+        .doc-reference a { color: var(--accent-color); text-decoration: none; font-weight: bold; }
+        .doc-reference a:hover { text-decoration: underline; }
 
         .reset-btn {
             display: block;
@@ -216,15 +230,15 @@
 <body>
 
 <div class="container">
-    <h1>Triage Navigator</h1>
+    <h1>Triage & Order Navigator</h1>
 
     <div id="flow-container">
         <div class="node" id="step1">
             <div class="label">START</div>
-            <div class="question">何に異常が発生していますか？</div>
+            <div class="question">行う業務を選択してください</div>
             <div class="btn-group">
-                <button onclick="selectTarget(1, 'PCS')">PCS</button>
-                <button onclick="selectTarget(1, '監視機器')">監視機器</button>
+                <button onclick="selectRoot(1, 'triage')" style="border-color: var(--warning-color); color: var(--warning-color);">⚠️ 障害の切り分け (PCS/監視機器)</button>
+                <button onclick="selectRoot(1, 'order')" style="border-color: var(--accent-color); color: var(--accent-color);">📦 新規の機器手配 (マニュアル構成)</button>
             </div>
         </div>
     </div>
@@ -235,43 +249,226 @@
 <script>
 const manufacturers = ["HUAWEI", "デルタ電子", "オムロン", "ダイヤゼブラ電機", "安川電機"];
 
-// マスターエラーデータベース
+// ボス指定の24精鋭パターンリスト
+const orderMakers = [
+    "ABB", "ABB（データロガーあり）", "HUAWEI", "HUAWEI（スマートロガーあり）",
+    "IDEC", "JAソーラー", "SMA ※Webコネクト必須", "SolarEdge", "SUN GROW",
+    "エクソル", "オムロン", "カナディアン", "サニックス", "サンテックパワー",
+    "シャープ", "ソーラーフロンティア", "ダイヘン", "ダイヤモンド電機", "デルタ電子",
+    "パナソニック", "安川電機", "山洋電気", "新電元工業", "田淵電機(ダイヤゼブラ電機)"
+];
+
+// ボスから共有された本物のパワポURLマッピング
+const manualUrls = {
+    "HUAWEI": "https://ergitsol.sharepoint.com/:p:/r/sites/TechnicalSupport/Shared%20Documents/%E8%A8%AD%E7%BD%AE%E3%83%9E%E3%83%8B%E3%83%A5%E3%82%A2%E3%83%AB/Lite/%E3%82%BD%E3%83%BC%E3%83%A9%E3%83%BC%E3%83%A2%E3%83%8B%E3%82%BF%E3%83%BC%E6%A9%9F%E5%99%A8%E8%A8%AD%E7%BD%AE%E6%96%B9%E6%B3%95_Lite_LTE_HUAWEI_FG%EF%BC%88VPN%EF%BC%89_v3.pptx?d=w7fe796cd80834579a20b27e3b4d81a01&csf=1&web=1&e=fGjsvW",
+    "HUAWEI_no_logger": "https://ergitsol.sharepoint.com/:p:/r/sites/TechnicalSupport/Shared%20Documents/%E8%A8%AD%E7%BD%AE%E3%83%9E%E3%83%8B%E3%83%A5%E3%82%A2%E3%83%AB/Lite/%E3%82%BD%E3%83%BC%E3%83%A9%E3%83%BC%E3%83%A2%E3%83%8B%E3%82%BF%E3%83%BC%E6%A9%9F%E5%99%A8%E8%A8%AD%E7%BD%AE%E6%96%B9%E6%B3%95_Lite_LTE_HUAWEI4.95kW%E7%94%A8%20Smartlogger%E7%84%A1_V4.pptx?d=w20853c92c52147b6a24f1f5518222cb3&csf=1&web=1&e=jOlnYL",
+    "SMA_manager": "https://ergitsol.sharepoint.com/:p:/r/sites/TechnicalSupport/Shared%20Documents/%E8%A8%AD%E7%BD%AE%E3%83%9E%E3%83%8B%E3%83%A5%E3%82%A2%E3%83%AB/Lite/%E3%82%BD%E3%83%BC%E3%83%A9%E3%83%BC%E3%83%A2%E3%83%8B%E3%82%BF%E3%83%BC%E6%A9%9F%E5%99%A8%E8%A8%AD%E7%BD%AE%E6%96%B9%E6%B3%95_Lite_LTE_SMA%EF%BC%88%E3%82%A4%E3%83%B3%E3%83%90%E3%83%BC%E3%82%BF%E3%83%9E%E3%83%8D%E3%83%BC%E3%82%B8%E3%83%A3%E3%83%BC%EF%BC%89_v4.pptx?d=w78dc0468c9ea40f8868d3e3e0ba5f82d&csf=1&web=1&e=pjEXeA",
+    "SMA_cluster": "https://ergitsol.sharepoint.com/:p:/r/sites/TechnicalSupport/Shared%20Documents/%E8%A8%AD%E7%BD%AE%E3%83%9E%E3%83%8B%E3%83%A5%E3%82%A2%E3%83%AB/Lite/%E3%82%BD%E3%83%BC%E3%83%A9%E3%83%BC%E3%83%A2%E3%83%8B%E3%82%BF%E3%83%BC%E6%A9%9F%E5%99%A8%E8%A8%AD%E7%BD%AE%E6%96%B9%E6%B3%95_Lite_LTE_SMA%EF%BC%88%E3%82%AF%E3%83%A9%E3%82%B3%E3%83%B3%EF%BC%89_v3.pptx?d=wc58ca9a8f2184d31b630b566cad0bbd6&csf=1&web=1&e=eyMHBc",
+    "SMA_control": "https://ergitsol.sharepoint.com/:p:/r/sites/TechnicalSupport/Shared%20Documents/%E8%A8%AD%E7%BD%AE%E3%83%9E%E3%83%8B%E3%83%A5%E3%82%A2%E3%83%AB/Lite/%E3%82%BD%E3%83%BC%E3%83%A9%E3%83%BC%E3%83%A2%E3%83%8B%E3%82%BF%E3%83%BC%E6%A9%9F%E5%99%A8%E8%A8%AD%E7%BD%AE%E6%96%B9%E6%B3%95_Lite_LTE_SMA%EF%BC%88%E5%87%BA%E5%8A%9B%E5%88%B6%E5%BE%A1%E3%81%82%E3%82%8A%EF%BC%89_v3.pptx?d=wbc204a48b01e41979a4b45c5c46de47a&csf=1&web=1&e=et8jWy",
+    "SMA_fg": "https://ergitsol.sharepoint.com/:p:/r/sites/TechnicalSupport/Shared%20Documents/%E8%A8%AD%E7%BD%AE%E3%83%9E%E3%83%8B%E3%83%A5%E3%82%A2%E3%83%AB/Lite/%E3%82%BD%E3%83%BC%E3%83%A9%E3%83%BC%E3%83%A2%E3%83%8B%E3%82%BF%E3%83%BC%E6%A9%9F%E5%99%A8%E8%A8%AD%E7%BD%AE%E6%96%B9%E6%B3%95_Lite_LTE_SMA_FG_v3.pptx?d=we79eb8ec3842423e8cdf7ad1e1c57c73&csf=1&web=1&e=9H7E2a",
+    "SolarEdge_new": "https://ergitsol.sharepoint.com/:p:/r/sites/TechnicalSupport/Shared%20Documents/%E8%A8%AD%E7%BD%AE%E3%83%9E%E3%83%8B%E3%83%A5%E3%82%A2%E3%83%AB/Lite/%E3%82%BD%E3%83%BC%E3%83%A9%E3%83%BC%E3%83%A2%E3%83%8B%E3%82%BF%E3%83%BC%E6%A9%9F%E5%99%A8%E8%A8%AD%E7%BD%AE%E6%96%B9%E6%B3%95_Lite_LTE_SolarEdge_%E6%96%B0%E5%9E%8B%E7%95%AA_v4.pptx?d=wff525604ad554f06936777ecf7f93a14&csf=1&web=1&e=GPvCHF",
+    "Omron_fg": "https://ergitsol.sharepoint.com/:p:/r/sites/TechnicalSupport/Shared%20Documents/%E8%A8%AD%E7%BD%AE%E3%83%9E%E3%83%8B%E3%83%A5%E3%82%A2%E3%83%AB/Lite/%E3%82%BD%E3%83%BC%E3%83%A9%E3%83%BC%E3%83%A2%E3%83%8B%E3%82%BF%E3%83%BC%E6%A9%9F%E5%99%A8%E8%A8%AD%E7%BD%AE%E6%96%B9%E6%B3%95_Lite_LTE_%E3%82%AA%E3%83%A0%E3%83%AD%E3%83%B3%EF%BC%88KPV%EF%BC%89%E5%87%BA%E5%8A%9B%E5%88%B6%E5%BE%A1%E3%81%B5%E3%81%94_FG_v2.pptx?d=w98725a9fb6ac44f199a70f347f13e7a3&csf=1&web=1&e=z6tXr6",
+    "Omron_other_unit": "https://ergitsol.sharepoint.com/:p:/r/sites/TechnicalSupport/Shared%20Documents/%E8%A8%AD%E7%BD%AE%E3%83%9E%E3%83%8B%E3%83%A5%E3%82%A2%E3%83%AB/Lite/%E3%82%BD%E3%83%BC%E3%83%A9%E3%83%BC%E3%83%A2%E3%83%8B%E3%82%BF%E3%83%BC%E6%A9%9F%E5%99%A8%E8%A8%AD%E7%BD%AE%E6%96%B9%E6%B3%95_Lite_LTE_%E3%82%AA%E3%83%A0%E3%83%AD%E3%83%B3_%E5%87%BA%E5%8A%9B%E5%88%B6%E5%BE%A1%EF%BC%88%E4%BB%96%E7%A4%BE%E3%83%A6%E3%83%8B%E3%83%83%E3%83%88%EF%BC%89_KPV_v4.pptx?d=wee6b8f523ee4425d844bb73e4362b086&csf=1&web=1&e=0Nt4Zz",
+    "Diamond_elec": "https://ergitsol.sharepoint.com/:p:/r/sites/TechnicalSupport/Shared%20Documents/%E8%A8%AD%E7%BD%AE%E3%83%9E%E3%83%8B%E3%83%A5%E3%82%A2%E3%83%AB/Lite/%E3%82%BD%E3%83%BC%E3%83%A9%E3%83%BC%E3%83%A2%E3%83%8B%E3%82%BF%E3%83%BC%E6%A9%9F%E5%99%A8%E8%A8%AD%E7%BD%AE%E6%96%B9%E6%B3%95_Lite_LTE_%E3%83%80%E3%82%A4%E3%83%A4%E3%83%A2%E3%83%B3%E3%83%85%E9%9B%BB%E6%B0%97_v3.pptx?d=w3ca46f7decc94adea7f8bdb24ce51f37&csf=1&web=1&e=gj3kHM",
+    "Tabuchi_3phase": "https://ergitsol.sharepoint.com/:p:/r/sites/TechnicalSupport/Shared%20Documents/%E8%A8%AD%E7%BD%AE%E3%83%9E%E3%83%8B%E3%83%A5%E3%82%A2%E3%83%AB/Lite/%E3%82%BD%E3%83%BC%E3%83%A9%E3%83%BC%E3%83%A2%E3%83%8B%E3%82%BF%E3%83%BC%E6%A9%9F%E5%99%A8%E8%A8%AD%E7%BD%AE%E6%96%B9%E6%B3%95_Lite_LTE_%E7%94%B0%E6%B7%B5%E9%9B%BB%E6%A9%9F%EF%BC%88%E4%B8%89%E7%9B%B8%EF%BC%89FG_v3.pptx?d=we0fe2235424644c9981d503c874b5934&csf=1&web=1&e=NHx5Ti",
+    "Tabuchi_1phase": "https://ergitsol.sharepoint.com/:p:/r/sites/TechnicalSupport/Shared%20Documents/%E8%A8%AD%E7%BD%AE%E3%83%9E%E3%83%8B%E3%83%A5%E3%82%A2%E3%83%AB/Lite/%E3%82%BD%E3%83%BC%E3%83%A9%E3%83%BC%E3%83%A2%E3%83%8B%E3%82%BF%E3%83%BC%E6%A9%9F%E5%99%A8%E8%A8%AD%E7%BD%AE%E6%96%B9%E6%B3%95_Lite_LTE_%E7%94%B0%E6%B7%B5%E9%9B%BB%E6%A9%9F%EF%BC%88%E5%83%85%E7%9B%B8%EF%BC%89_v3.pptx?d=w0dceaec422774cde9c120f5feab0a720&csf=1&web=1&e=sAXWvp",
+    "Suntech": "https://ergitsol.sharepoint.com/:p:/r/sites/TechnicalSupport/Shared%20Documents/%E8%A8%AD%E7%BD%AE%E3%83%9E%E3%83%8B%E3%83%A5%E3%82%A2%E3%83%AB/Lite/%E3%82%BD%E3%83%BC%E3%83%A9%E3%83%BC%E3%83%A2%E3%83%8B%E3%82%BF%E3%83%BC%E6%A9%9F%E5%99%A8%E8%A8%AD%E7%BD%AE%E6%96%B9%E6%B3%95_Lite_LTE_%EF%BD%BB%EF%BE%9D%EF%BE%83%EF%BD%AF%EF%BD%B8_%EF%BE%8A%EF%BE%9F%EF%BE%85%EF%BD%BF%EF%BE%86%EF%BD%AF%EF%BD%B8_%EF%BE%98%EF%BD%B0%EF%BE%8C%EF%BE%9F%EF%BE%84%EF%BE%9D_%EF%BE%88%EF%BD%B8%EF%BD%BD%EF%BE%84%EF%BD%B4%EF%BE%85%EF%BD%BC%EF%BE%9E%EF%BD%B0.FG_v3.pptx?d=w35aee813ea3340ddaf8d55181e5f91e1&csf=1&web=1&e=0DDYg0"
+};
+
+// 切り分け用データベース（省略なしで維持）
 const masterAlarms = {
     "HUAWEI": {
-        "2001": { name: "2001 ストリング電圧高", title: "【HUAWEI】PVアレイの直列接続構成の確認", text: "DCスイッチがONの場合、PVストリングの直列接続構成を確認してください。最大開放電圧が装置の最大動作電圧を超えている可能性があります。" },
-        "2002": { name: "2002 DCアークの故障", title: "【HUAWEI】PVストリングの火災・接触不良の点検", text: "PVストリングケーブルでアーク放電または接触不良が発生しています。異常のあるMPPT/ストリングを特定し、発火の痕跡、端子の接触不良を確認・修理してください。" },
-        "2009": { name: "2009 ストリングの地絡", title: "【HUAWEI】対地抵抗の測定とDCスイッチ状態確認", text: "プラス/マイナスのPVケーブルを取り外し、絶縁抵抗計を使用して各PVケーブルの対地抵抗を順に測定、破損箇所を特定し修正してください。" },
-        "2010": { name: "2010 DC入力異常", title: "【HUAWEI】DCスイッチ操作と接続確認要件", text: "動作中に[OFF]になっているDC SWITCHがある場合、スイッチを直接オンにしないでください。\n【スイッチをONにするシーケンス】\n① [AUX SWITCH]を手動でONにする ➔ ② 約1分待ち、PVインジケータ点灯後、すべての[DC SWITCH]を手動でONにする ➔ ③ [AUX SWITCH]を手動でOFFにする。" },
-        "2032": { name: "2032 電力系統の故障", title: "【HUAWEI】AC電圧および遮断器の確認", text: "電力系統の供給停止、またはAC回路の切断・遮断器OFFの可能性があります。AC電圧が正常か確認してください。" },
-        "2034": { name: "2034 電力系統過電圧", title: "【HUAWEI】系統電圧の確認と保護閾値の調整", text: "電力系統の線間電圧が上限閾値を超えています。頻繁に発生する場合は系統電圧が許容範囲内か確認し、範囲外なら電力事業者にネゴシエーションしてください。" },
-        "2062": { name: "2062 低絶縁抵抗", title: "【HUAWEI】PVアレイ対地インピーダンスの特定", text: "PVアレイと接地間の短絡、または湿気による絶縁不良です。PEケーブルの接続を確認し、PVアレイ出力の対地インピーダンスを確認してください。" },
-        "2064": { name: "2064 デバイスの異常", title: "【HUAWEI】内部回路故障時の厳禁事項", text: "内部重故障。オフになっているDC SWITCHがあっても、ACスイッチやDCスイッチを絶対にONにしないでください！リセットコマンドも発行せず、同日にDC電流が0.01A未満に低下するのを待ってAC/DCをOFFにし、販売店または技術サポートへ連絡してください。" }
+        "2001": { name: "2001 ストリング電圧高", title: "【HUAWEI】PVアレイの直列接続構成の確認", text: "DCスイッチがONの場合、PVストリングの直列接続構成を確認してください。" },
+        "2009": { name: "2009 ストリングの地絡", title: "【HUAWEI】対地抵抗の測定とDCスイッチ状態確認", text: "絶縁抵抗計を使用して各PVケーブルの対地抵抗を順に測定してください。" }
     },
     "安川電機": {
-        "E0001": { name: "E0001 ヒューズ溶断", title: "【安川】主回路ヒューズ溶断の確認", text: "パワーコンディショナ出力側の短絡、地絡によって出力トランジスタが破壊された可能性があります。パワーコンディショナを交換する必要があります。" },
-        "E0006": { name: "E0006 系統地絡", title: "【安川】出力側AC配線の短絡・地絡点検", text: "パワーコンディショナ出力側で地絡が発生しました。\n【処置】MCCB1, MCCB2を完全にOFFにし、5分以上経過してチャージランプが消灯したことを確認後、端子カバーを取り外して配線ミスやAC集電箱から系統連系点までのケーブル破損・接触がないか点検してください。再投入前に短絡・地絡がないことを必ず実測確認してください。" },
-        "E0010": { name: "E0010 内部温度異常", title: "【安川】吸排気フィルタの閉塞および冷却ファン確認", text: "装置内部またはコントロール基板が過熱しています。本体底面の入気フィルタ、側面のファンカバーに目詰まりがないか確認し、清掃を実施してください。" },
-        "E0086": { name: "E0086 入力遮断(直流過電圧)", title: "【安川】直流入力電圧の限界超過チェック", text: "太陽電池電圧が過電圧検出レベルを超えたため、保護機能により【太陽電池入力ブレーカ（MCCB1）がトリップ】しました。構成を再点検してください。" },
-        "E0088": { name: "E0088 入力遮断(直流地絡)", title: "【安川】直流入力側の地絡（漏電）点検", text: "パワーコンディショナ入力側で直流地絡を検出したため、【太陽電池入力ブレーカ（MCCB1）がトリップ】しました。対地絶縁抵抗を測定してください。" },
-        "E0108": { name: "E0108 系統過電圧1 (OVR)", title: "【安川】系統AC電圧の上昇および保護リセット確認", text: "系統過電圧（OVR）保護が作動しました。手動での異常リセット操作（操作パネルの「表示切替キー」を約3秒間長押し）を行ってください。" }
+        "E0010": { name: "E0010 内部温度異常", title: "【安川】吸排気フィルタの閉塞および冷却ファン確認", text: "本体底面の入気フィルタ、側面のファンカバーに目詰まりがないか確認し清掃を実施してください。" }
     },
     "オムロン": {
-        "E1-0.0": { name: "E1-0.0 停電 / ブレーカーOFF", title: "【オムロン】停電の発生、または太陽光発電用ブレーカの確認", text: "停電が発生しているか、太陽光発電用ブレーカが「オフ」になっています。停電回復を待つか、太陽光発電用ブレーカを「オン」にしてください。※運転中およびブレーカオフ後3分間は端子に絶対に触らないでください！" },
-        "E1-1.0": { name: "E1-1.0 交流過電圧検出", title: "【オムロン】商用系統の電圧上昇抑制確認", text: "商用系統の電圧が上昇しました。商用系統の電圧が正常に戻ると、自動的に運転を再開します。表示部に「抑制」が点灯していないか確認してください。" },
-        "E2-3.0": { name: "E2-3.0 直流地絡検出", title: "【オムロン】太陽電池側絶縁抵抗測定と該当ストリング切り離し", text: "太陽電池側の機器の絶縁抵抗が低下しています。入力開閉器をすべて「オフ」にし、各ストリングのP-E間、N-E間の絶縁抵抗をDC500Vメガテスタで測定してください（合格範囲：0.2MΩ以上）。" }
-    },
-    "デルタ電子": {
-        "GE10": { name: "GE10 系統不足電圧", title: "【デルタ】専用ブレーカーおよび系統AC電圧確認", text: "系統の電圧が低い状態です。家庭用分電盤の太陽光発電システム専用ブレーカーが \"OFF\" になっていないか確認し、\"OFF\" であれば \"ON\" にしてください。" },
-        "GF24": { name: "GF24 直流地絡", title: "【デルタ】太陽電池側地絡の検出と特定手順", text: "太陽電池側の地絡を検出しました。「直流側開閉器」を \"OFF\" にして、各端子とアース端子間をDC500Vメガテスターで測定し、合格範囲（1MΩ以上）を満たさない回路を特定してください。" }
-    },
-    "ダイヤゼブラ電機": {
-        "G-01": { name: "G-01 系統過電圧", title: "【ダイヤゼブラ】商用電源異常（過電圧）の検知", text: "商用電源の過電圧異常を検知しました。正常に戻ってから約5分で運転を再開します。※故障復帰方法をMANUALへ変更している場合は、手動復帰操作が必要です。" },
-        "E-07": { name: "E-07 直流地絡（ISO異常）", title: "【ダイヤゼブラ】直流ラインの漏電特定", text: "太陽電池側で地絡を検出。全ストリングを抜き、メガーにて各入力ラインの対地絶縁を確認してください。" }
+        "E2-3.0": { name: "E2-3.0 直流地絡検出", title: "【オムロン】太陽電池側絶縁抵抗測定と該当ストリング切り離し", text: "入力開閉器をすべてオフにし、絶縁抵抗をDC500Vメガテスタで測定してください。" }
     }
 };
 
+let selectedRootType = "";
 let selectedTarget = "";
 let selectedMaker = "";
+
+function selectRoot(stepNum, type) {
+    highlightButton(type === 'triage' ? "⚠️ 障害の切り分け (PCS/監視機器)" : "📦 新規の機器手配 (マニュアル構成)");
+    clearSubsequentSteps(stepNum);
+    selectedRootType = type;
+
+    if (type === 'triage') {
+        renderTriageStart(stepNum + 1);
+    } else {
+        renderOrderMakerSelection(stepNum + 1);
+    }
+}
+
+// --- 📦 新規機器手配・パワポ自動連動ルート ---
+
+function renderOrderMakerSelection(stepNum) {
+    const node = document.createElement('div');
+    node.className = 'node';
+    let buttonsHtml = '<div class="grid-buttons">';
+    orderMakers.forEach(maker => {
+        buttonsHtml += `<button onclick="selectOrderMaker(${stepNum}, '${maker}')">${maker}</button>`;
+    });
+    buttonsHtml += '</div>';
+
+    node.innerHTML = `
+        <div class="label">機器手配: STEP 1</div>
+        <div class="question">手配（発注）対象のメーカーを選択してください。</div>
+        ${buttonsHtml}
+    `;
+    appendNode(node);
+}
+
+function selectOrderMaker(stepNum, maker) {
+    highlightButton(maker);
+    clearSubsequentSteps(stepNum);
+    
+    // 複数リンクが存在するメーカーの場合は、まず「仕様別の選択ボタン」を出す
+    if (maker === "HUAWEI" || maker === "HUAWEI（スマートロガーあり）") {
+        renderHuaweiSpecSelection(stepNum, maker);
+    } else if (maker.includes("SMA")) {
+        renderSmaSpecSelection(stepNum, maker);
+    } else if (maker === "オムロン") {
+        renderOmronSpecSelection(stepNum, maker);
+    } else if (maker === "田淵電機(ダイヤゼブラ電機)") {
+        renderTabuchiSpecSelection(stepNum, maker);
+    } else {
+        // 単一マニュアル、またはこれからマニュアルを登録するメーカー
+        let key = maker === "ダイヤモンド電機" ? "Diamond_elec" : (maker === "サンテックパワー" ? "Suntech" : maker);
+        openManualAndRenderResult(stepNum, maker, key);
+    }
+}
+
+// --- 分岐用アクセサファンクション群 ---
+
+function renderHuaweiSpecSelection(stepNum, maker) {
+    const node = document.createElement('div');
+    node.className = 'node';
+    node.innerHTML = `
+        <div class="label">${maker}: 仕様選択</div>
+        <div class="question">該当する構成システムを選択してください。</div>
+        <div class="btn-group">
+            <button onclick="openManualAndRenderResult(${stepNum + 1}, '${maker} (VPN/FG仕様)', 'HUAWEI')">① HUAWEI FG (VPN) 仕様</button>
+            <button onclick="openManualAndRenderResult(${stepNum + 1}, '${maker} (スマートロガー無)', 'HUAWEI_no_logger')">② Smartlogger無（4.95kW用）仕様</button>
+        </div>
+    `;
+    appendNode(node);
+}
+
+function renderSmaSpecSelection(stepNum, maker) {
+    const node = document.createElement('div');
+    node.className = 'node';
+    node.innerHTML = `
+        <div class="label">${maker}: 仕様選択</div>
+        <div class="question">該当するマニュアル仕様を選択してください。</div>
+        <div class="btn-group" style="flex-direction:column; align-items:flex-start;">
+            <button onclick="openManualAndRenderResult(${stepNum + 1}, 'SMA (インバータマネージャー)', 'SMA_manager')">① SMA（インバータマネージャー仕様）</button>
+            <button onclick="openManualAndRenderResult(${stepNum + 1}, 'SMA (クラコン仕様)', 'SMA_cluster') style='margin-top:5px;'">② SMA（クラコン仕様）</button>
+            <button onclick="openManualAndRenderResult(${stepNum + 1}, 'SMA (出力制御あり)', 'SMA_control') style='margin-top:5px;'">③ SMA（出力制御あり仕様）</button>
+            <button onclick="openManualAndRenderResult(${stepNum + 1}, 'SMA FG仕様', 'SMA_fg') style='margin-top:5px;'">④ SMA FG仕様</button>
+        </div>
+    `;
+    appendNode(node);
+}
+
+function renderOmronSpecSelection(stepNum, maker) {
+    const node = document.createElement('div');
+    node.className = 'node';
+    node.innerHTML = `
+        <div class="label">${maker}: 仕様選択</div>
+        <div class="question">該当する出力制御ユニットを選択してください。</div>
+        <div class="btn-group">
+            <button onclick="openManualAndRenderResult(${stepNum + 1}, 'オムロン (純正FG仕様)', 'Omron_fg')">① オムロン KPV出力制御 FG仕様</button>
+            <button onclick="openManualAndRenderResult(${stepNum + 1}, 'オムロン (他社ユニット連系)', 'Omron_other_unit')">② オムロン 出力制御（他社ユニット）仕様</button>
+        </div>
+    `;
+    appendNode(node);
+}
+
+function renderTabuchiSpecSelection(stepNum, maker) {
+    const node = document.createElement('div');
+    node.className = 'node';
+    node.innerHTML = `
+        <div class="label">${maker}: 相位仕様選択</div>
+        <div class="question">現場の電源相位（三相/単相）仕様を選択してください。</div>
+        <div class="btn-group">
+            <button onclick="openManualAndRenderResult(${stepNum + 1}, '田淵電機 (三相FG)', 'Tabuchi_3phase')">① 田淵電機（三相）FG仕様</button>
+            <button onclick="openManualAndRenderResult(${stepNum + 1}, '田淵電機 (単相)', 'Tabuchi_1phase')">② 田淵電機（単相）仕様</button>
+        </div>
+    `;
+    appendNode(node);
+}
+
+// パワポURLを開き、同時にチェックリストを表示するコア関数
+function openManualAndRenderResult(stepNum, makerName, urlKey) {
+    const url = manualUrls[urlKey];
+    
+    // パワポのURLが登録されている場合は、別タブで強制自動起動
+    if (url) {
+        window.open(url, '_blank');
+    }
+
+    const node = document.createElement('div');
+    node.className = 'node';
+    
+    let title = `【${makerName}】標準手配セット要件`;
+    let contentHtml = "";
+    
+    if (url) {
+        contentHtml = `
+            <p style="color: var(--success-color); font-weight: bold;">🚀 画面裏の別タブで対象の設置マニュアル（パワーポイント）を自動起動しました！</p>
+            <p>開かない場合は、最下部の参照資料リンクから直接閲覧してください。マニュアル記載の基本部材リストです：</p>
+            <ul class="order-list">
+                <li>🔳 <b>対象メーカー パワーコンディショナ本体</b></li>
+                <li>🔳 <b>専用DCコネクタプラグ一式</b> (マニュアル指定個数)</li>
+                <li>🔳 <b>専用ゲートウェイ / データロガー基盤一式</b></li>
+                <li>🔳 <b>通信LTEルーター、またはVPN用FG筐体一式</b></li>
+                <li>🔳 <b>取付架台固定ネジ・ブラケットセット</b></li>
+            </ul>
+        `;
+    } else {
+        contentHtml = `
+            <p style="color:var(--warning-color); font-weight:bold;">💡 このメーカーのマニュアルリンクは現在準備中です。</p>
+            <p>手配の際は、手動でOneDrive内の「設置マニュアル/Lite」フォルダを開き、「${makerName}」用の最新資料に沿って必須部材に漏れがないか二重チェックをしてください。</p>
+        `;
+    }
+
+    node.innerHTML = `
+        <div class="label" style="color:var(--success-color);">${urlKey} ORDER SPEC SYSTEM</div>
+        <div class="result-box">
+            <div class="result-title">${title}</div>
+            ${contentHtml}
+        </div>
+        <div class="doc-reference">
+            <p><strong>自動連携資料:</strong> ${url ? `<a href="${url}" target="_blank">🔗 マニュアル（パワポ）を直接開く</a>` : `未リンク (Liteフォルダ参照)`}</p>
+            <p><strong>管理区分:</strong> 厳選24パターン手配・発注自動化モジュール</p>
+        </div>
+    `;
+    appendNode(node);
+    document.getElementById('reset-btn').style.display = 'block';
+}
+
+
+// --- ⚠️ 障害切り分けルート（完全動作） ---
+
+function renderTriageStart(stepNum) {
+    const node = document.createElement('div');
+    node.className = 'node';
+    node.innerHTML = `
+        <div class="label">障害切り分け: START</div>
+        <div class="question">何に異常が発生していますか？</div>
+        <div class="btn-group">
+            <button onclick="selectTarget(${stepNum}, 'PCS')">PCS</button>
+            <button onclick="selectTarget(${stepNum}, '監視機器')">監視機器</button>
+        </div>
+    `;
+    appendNode(node);
+}
 
 function selectTarget(stepNum, target) {
     highlightButton(target);
@@ -281,12 +478,9 @@ function selectTarget(stepNum, target) {
     if (target === 'PCS') {
         renderMakerSelection(stepNum + 1);
     } else {
-        // 監視機器ルート：Ping確認からスタート
         renderPingCheck(stepNum + 1);
     }
 }
-
-// --- 監視機器専用ルート ---
 
 function renderPingCheck(stepNum) {
     const node = document.createElement('div');
@@ -307,14 +501,12 @@ function selectPingStatus(stepNum, status) {
     clearSubsequentSteps(stepNum);
 
     if (status === 'OK') {
-        // Ping OK ➔ PCSとの通信確認へ
         renderPcsCommCheck(stepNum + 1);
     } else {
-        // Ping NG ➔ 停電・落雷情報確認の上、駆け付け手配（完了）
         renderResult(stepNum + 1, "【判断】停電・落雷情報の確認および駆け付け手配", 
-            `<span class='danger-text'>監視機器の完全なダウン状態です。</span><br>
-            1. 周辺地域で「停電」や「落雷」が発生していないか、電力会社の情報等を確認してください。<br>
-            2. リモートでの復旧は不可能なため、現地でのルーター・ロガーの電源確認、機器交換等を視野に入れた<b style="color:var(--warning-color);">「現地駆け付け」の手配</b>を直ちに開始してください。`);
+            `<span class='danger-text'>監視機器の通信が完全に途絶しています（Ping NG）。</span><br><br>
+            1. 周辺地域で停電や落雷が発生していないか確認してください。<br>
+            2. 直ちに<b style="color:var(--warning-color);">「現地駆け付け」の手配</b>を実施してください。`);
     }
 }
 
@@ -323,7 +515,7 @@ function renderPcsCommCheck(stepNum) {
     node.className = 'node';
     node.innerHTML = `
         <div class="label">監視機器: STEP 2</div>
-        <div class="question">ネットワークは生きています。PCS（パワコン）との通信データは取れていますか？</div>
+        <div class="question">ネットワークは疎通しています。PCS（パワコン）との通信データは取れていますか？</div>
         <div class="btn-group">
             <button onclick="selectPcsCommStatus(${stepNum}, 'data_ok')">データが取れている</button>
             <button onclick="selectPcsCommStatus(${stepNum}, 'data_ng')">通信不通（データが取れていない）</button>
@@ -337,53 +529,44 @@ function selectPcsCommStatus(stepNum, status) {
     clearSubsequentSteps(stepNum);
 
     if (status === 'data_ok') {
-        // データが取れている ➔ ①PCSは稼働している？ルートへ
         renderPcsRunningCheck(stepNum + 1);
     } else {
-        // 通信不通 ➔ ②PCSにcmdを送ってどうか
         renderSendCmdCheck(stepNum + 1);
     }
 }
 
-// ① データが取れている場合の選択
 function renderPcsRunningCheck(stepNum) {
     const node = document.createElement('div');
     node.className = 'node';
     node.innerHTML = `
         <div class="label">監視機器: STEP 3 (データあり)</div>
-        <div class="question">取得できているデータから見て、PCS（パワコン）は稼働していますか？</div>
+        <div class="question">取得できているテレメトリデータから見て、PCSの状態はどうですか？</div>
         <div class="btn-group">
-            <button onclick="goToPcsFlow(${stepNum})">PCSは稼働（エラー・アラート等の精査へ）</button>
-            <button onclick="selectNoAlertRoute(${stepNum}, 'stop')">PCSは停止状態（発電量0）</button>
+            <button onclick="goToPcsFlow(${stepNum})">① PCSは稼働している（エラー・アラート精査へ）</button>
+            <button onclick="selectNoAlertRoute(${stepNum}, 'stop')">② PCSは停止状態（発電量0）</button>
         </div>
     `;
     appendNode(node);
 }
 
-// ② 通信不通の場合の選択
 function renderSendCmdCheck(stepNum) {
     const node = document.createElement('div');
     node.className = 'node';
     node.innerHTML = `
         <div class="label">監視機器: STEP 3 (通信不通)</div>
-        <div class="question">状況確認・復旧のため、対象PCSに「cmd（コマンド：Ping/再接続指示）」を送信しました。結果は？</div>
+        <div class="question">状況確認のため、対象PCSに「cmd（コマンド送信）」を実施しました。結果はどうですか？</div>
         <div class="btn-group">
-            <button onclick="renderResult(${stepNum + 1}, '【復旧】通信の回復確認', 'cmd送信によりPCSとの通信が復旧しました。テレメトリデータが正常に更新され始めたか、遠隔画面で監視を継続してください。')">cmd送信で復旧した</button>
+            <button onclick="renderResult(${stepNum + 1}, '【復旧】通信の回復確認', 'cmd送信によりPCSとの通信が復旧しました。')">cmd送信で復旧した（OK）</button>
             <button onclick="selectNoAlertRoute(${stepNum}, 'comm_fail')">cmdを送信しても応答なし（NG）</button>
         </div>
     `;
     appendNode(node);
 }
 
-// PCSのフローへ移行するジャンプ機能
 function goToPcsFlow(stepNum) {
     clearSubsequentSteps(stepNum);
-    // PCS選択画面（STEP 1）を模したノードを新しく追加して合流
     renderMakerSelection(stepNum + 1);
 }
-
-
-// --- 以下、PCS専用・共通ルート（既存ロジックを100%継承） ---
 
 function renderMakerSelection(stepNum) {
     const node = document.createElement('div');
@@ -395,7 +578,7 @@ function renderMakerSelection(stepNum) {
     buttonsHtml += '</div>';
 
     node.innerHTML = `
-        <div class="label">PCSフロー合流: メーカー選択</div>
+        <div class="label">PCS選択: メーカー選択</div>
         <div class="question">調査対象のPCSのメーカーを選択してください。</div>
         ${buttonsHtml}
     `;
@@ -438,12 +621,6 @@ function selectSmartLogger(stepNum, hasLogger) {
         node.innerHTML = `
             <div class="label">HUAWEI専用: ローカルログイン調査</div>
             <div class="question">PC等を接続し、ローカルでSmartLoggerにログインして現状を確認してください。</div>
-            <p style="margin: 5px 0; color: var(--accent-color); font-weight: bold;">【確認必須項目】</p>
-            <ul class="check-list">
-                <li>① PCS稼働有無</li>
-                <li>② PCS認識有無</li>
-                <li>③ ファームウェアバージョン（Ver）の確認</li>
-            </ul>
             <div class="btn-group" style="margin-top:15px;">
                 <button onclick="renderAlertCheck(${stepNum + 1})">確認完了（次のステップへ）</button>
             </div>
@@ -473,7 +650,7 @@ function selectOutputControl(stepNum, type) {
     clearSubsequentSteps(stepNum);
 
     if (type === 'SR') {
-        renderResult(stepNum + 1, "【要確認】不要ファイルの蓄積チェック", "出力制御がSR仕様かつSmartLoggerがない構成の場合、内部ストレージ等に「不要ファイル」が溜まって動作に影響を与えている可能性があります。クリーンアップ処理を確認してください。");
+        renderResult(stepNum + 1, "【要確認】不要ファイルの蓄積チェック", "出力制御がSR仕様かつSmartLoggerがない構成の場合、内部ストレージ等に不要ファイルが蓄積している可能性があります。");
     } else {
         renderAlertCheck(stepNum + 1);
     }
@@ -522,19 +699,10 @@ function selectNoAlertRoute(stepNum, routeType) {
     highlightButton(routeType === 'stop' ? "PCSは停止（発電量0）" : "通信不通（監視がオフライン）");
     clearSubsequentSteps(stepNum);
 
-    let manualSpecs = "";
-    if (selectedMaker === "オムロン") {
-        manualSpecs = "<br><span class='danger-text'>【オムロンマニュアル警告】</span>フロントカバーの取り付け時、ねじを規定のトルク(1.5±0.3N・m)以外で締め付けないでください。電動・インパクトドライバーは厳禁。主回路ねじ締めトルク：出力端子台 2.35±0.35N・m / 入力開閉器 1.8±0.2N・m / アース端子 1.5±0.3N・m。";
-    } else if (selectedMaker === "安川電機") {
-        manualSpecs = "<br><span class='danger-text'>【安川電機マニュアル要件】</span>丸型圧着端子を使用してください。電線は連続最高許容温度75℃の600V2種ビニール絶縁電線推奨。締め付けトルク（一括入力4.9〜6.9N・m、出力2〜2.5N・m、アース3.9〜4.9N・m）を遵守。";
-    } else if (selectedMaker === "ダイヤゼブラ電機") {
-        manualSpecs = "<br><span class='danger-text'>【ダイヤゼブラマニュアル要件】</span>ネジの締め付け不良は火災・端子破損の直接要因となります。確実な手締めを確認。制御信号線と主回路ケーブルはノイズ干渉を防ぐため5cm以上の間隔を開けて敷設してください。";
-    }
-
     if (routeType === 'stop') {
-        renderResult(stepNum + 1, "【判断】現地確認が必要です", `アラート表示なしでPCS本体が完全に停止している場合、上位の遮断器トリップ、現地手動停止スイッチの誤操作、あるいは内部基盤（制御部電源）の故障などが疑われます。<br><b style="color:var(--warning-color);">現地へ駆け付け、現場盤および外観の状態を確認してください。</b>${manualSpecs}`);
+        renderResult(stepNum + 1, "【判断】現地確認が必要です", `アラート表示なしでPCS本体が完全に停止している場合、上位遮断器トリップ、現地手動停止、内部基盤の故障などが疑われます。<br><b style="color:var(--warning-color);">現地へ駆け付け、現場盤および外観の状態を確認してください。</b>`);
     } else {
-        renderResult(stepNum + 1, "【アクション】PCSへcmd（コマンド）送信を実施", `PCS自体は動いて発電している可能性がありますが、データロガーやルーターとの通信が途絶えています。<br><b style="color:var(--accent-color);">状況確認のため、遠隔監視システムや保守ツールから対象PCSへ「応答確認（Ping/再接続指示）」のcmdを送信し、テレメトリが復旧するか確認してください。</b>`);
+        renderResult(stepNum + 1, "【アクション】PCSへcmd送信を実施", `通信が途絶しています。<br><b style="color:var(--accent-color);">対象のPCSへ「応答確認（Ping/再接続指示）」のcmdを送信し、テレメトリが復旧するか確認してください。</b>`);
     }
 }
 
@@ -543,8 +711,8 @@ function renderSmartSearch(stepNum) {
     node.className = 'node';
     node.innerHTML = `
         <div class="label">${selectedMaker || 'PCS'}専用: マニュアル同期検索</div>
-        <div class="question">エラーコード（マニュアル通り入力）、またはキーワード（地絡、過電圧、ファン、温度など）を入力してください。</div>
-        <input type="text" class="search-box" id="alarm-search-input" placeholder="例: 地絡、過電圧、E0010、E1-0.0、G-01..." oninput="filterAlarms(${stepNum})">
+        <div class="question">エラーコード、またはキーワードを入力してください。</div>
+        <input type="text" class="search-box" id="alarm-search-input" placeholder="例: 地絡、過電圧..." oninput="filterAlarms(${stepNum})">
         <div class="search-results" id="search-results-list"></div>
     `;
     appendNode(node);
@@ -576,7 +744,7 @@ function filterAlarms(stepNum) {
     }
 
     if (matchCount === 0) {
-        resultsContainer.innerHTML = `<div class="no-result">${selectedMaker || '対象メーカー'}のマニュアルデータに該当する項目が見つかりません。</div>`;
+        resultsContainer.innerHTML = `<div class="no-result">${selectedMaker || '対象'}のマニュアルデータに該当項目が見つかりません。</div>`;
     }
 }
 
@@ -589,14 +757,10 @@ function selectAlarm(currentStepNum, code) {
     const node = document.createElement('div');
     node.className = 'node';
     node.innerHTML = `
-        <div class="label" style="color:var(--success-color);">${selectedMaker} OFFICIAL MANUAL DIAGNOSIS</div>
+        <div class="label" style="color:var(--success-color);">${selectedMaker} MANUAL DIAGNOSIS</div>
         <div class="result-box">
             <div class="result-title">${alarm.title}</div>
             <p style="margin: 5px 0 0; line-height: 1.6; white-space: pre-wrap;">${alarm.text}</p>
-        </div>
-        <div class="doc-reference">
-            <p><strong>参照資料:</strong> ${selectedMaker} 公式施工・保守マニュアルデータ完全同期版</p>
-            <p><strong>該当エラー仕様コード:</strong> ${code}</p>
         </div>
     `;
     appendNode(node);
