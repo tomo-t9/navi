@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>マルチPCS・監視・手配 統合管理ナビゲーター (マニュアル直結版)</title>
+    <title>Field Flow Navigator</title>
     <style>
         :root {
             --bg-color: #0d1117;
@@ -35,7 +35,7 @@
         h1 {
             text-align: center;
             color: var(--accent-color);
-            font-size: 1.8rem;
+            font-size: 2.2rem;
             margin-bottom: 30px;
             text-transform: uppercase;
             letter-spacing: 2px;
@@ -230,7 +230,7 @@
 <body>
 
 <div class="container">
-    <h1>Triage & Order Navigator</h1>
+    <h1>Field Flow Navigator</h1>
 
     <div id="flow-container">
         <div class="node" id="step1">
@@ -249,7 +249,7 @@
 <script>
 const manufacturers = ["HUAWEI", "デルタ電子", "オムロン", "ダイヤゼブラ電機", "安川電機"];
 
-// ボス指定の24精鋭パターンリスト
+// ボス指定 of 24精鋭パターンリスト
 const orderMakers = [
     "ABB", "HUAWEI", "IDEC", "JAソーラー", "SMA ※Webコネクト必須", "SolarEdge", "SUN GROW",
     "エクソル", "オムロン", "カナディアン", "サニックス", "サンテックパワー",
@@ -284,14 +284,14 @@ const manualUrls = {
 // 切り分け用データベース（省略なしで維持）
 const masterAlarms = {
     "HUAWEI": {
-        "2001": { name: "2001 ストリング電圧高", title: "【HUAWEI】PVアレイの直列接続構成の確認", text: "DCスイッチがONの場合、PVストリングの直列接続構成を確認してください。" },
+        "2001": { name: "2001 ストリング電圧高", title: "【HUAWEI】PVアレイの直列接続構成の確認", text: "DCスイッチがONの場合,PVストリングの直列接続構成を確認してください。" },
         "2009": { name: "2009 ストリングの地絡", title: "【HUAWEI】対地抵抗の測定とDCスイッチ状態確認", text: "絶縁抵抗計を使用して各PVケーブルの対地抵抗を順に測定してください。" }
     },
     "安川電機": {
-        "E0010": { name: "E0010 内部温度異常", title: "【安川】吸排気フィルタの閉塞および冷却ファン確認", text: "本体底面の入気フィルタ、側面のファンカバーに目詰まりがないか確認し清飽を実施してください。" }
+        "E0010": { name: "E0010 内部温度異常", title: "【安川】吸排気フィルタの閉塞および冷却ファン確認", text: "本体底面の入気フィルタ,側面のファンカバーに目詰まりがないか確認し清飽を実施してください。" }
     },
     "オムロン": {
-        "E2-3.0": { name: "E2-3.0 直流地絡検出", title: "【オムロン】太陽電池側手動絶縁抵抗測定と該当ストリング判断し", text: "入力開閉器をすべてオフにし、絶縁抵抗をDC500Vメガテスタで測定してください。" }
+        "E2-3.0": { name: "E2-3.0 直流地絡検出", title: "【オムロン】太陽電池側手動手動絶縁抵抗測定と該当ストリング判断し", text: "入力開閉器をすべてオフにし,絶縁抵抗をDC500Vメガテスタで測定してください。" }
     }
 };
 
@@ -423,8 +423,6 @@ function renderTabuchiSpecSelection(stepNum, maker) {
 function openManualAndRenderResult(stepNum, makerName, urlKey) {
     const url = manualUrls[urlKey];
     
-    // 🚨 直リンクでの強制window.open自動起動を完全に削除しました！
-
     const node = document.createElement('div');
     node.className = 'node';
     
@@ -438,7 +436,6 @@ function openManualAndRenderResult(stepNum, makerName, urlKey) {
     let boxStyle = "";
     let titleStyle = "";
     
-    // リンクが登録されている場合
     if (url) {
         title = `【${displayMakerName}】標準手配セット要件`;
         boxStyle = "border-left: 4px solid var(--success-color); background-color: rgba(46, 164, 79, 0.1);";
@@ -455,13 +452,12 @@ function openManualAndRenderResult(stepNum, makerName, urlKey) {
             </ul>
         `;
     } else {
-        // 🚨 リンクがない場合は綺麗に「準備中」のカードを出すように変更！
         title = `【${displayMakerName}】マニュアル準備中`;
         boxStyle = "border-left: 4px solid var(--warning-color); background-color: rgba(255, 158, 59, 0.1);";
         titleStyle = "color: var(--warning-color);";
         contentHtml = `
             <p style="color: var(--warning-color); font-weight: bold;">💡 このメーカーのマニュアル（パワーポイント）は現在準備中です。</p>
-            <p>手配を進める際は、社内共有の最新資料や、発注先マニュアルに沿って必須部材に漏れがないか手動で二重チェックをお願いします。</p>
+            <p>手配を進める際は、社内共有の最新資料や,発注先マニュアルに沿って必須部材に漏れがないか手動で二重チェックをお願いします。</p>
         `;
     }
 
@@ -567,7 +563,7 @@ function renderPcsRunningCheck(stepNum) {
     node.className = 'node';
     node.innerHTML = `
         <div class="label">監視機器: STEP 3 (データあり)</div>
-        <div class="question">取得できているテレメトリデータから見て、PCSの状態はどうですか？</div>
+        <div class="question">取得できているテレメトリデータから見て,PCSの状態はどうですか？</div>
         <div class="btn-group">
             <button onclick="goToPcsFlow(${stepNum})">① PCSは稼働している（エラー・アラート精査へ）</button>
             <button onclick="selectNoAlertRoute(${stepNum}, 'stop')">② PCSは停止状態（発電量0）</button>
@@ -581,7 +577,7 @@ function renderSendCmdCheck(stepNum) {
     node.className = 'node';
     node.innerHTML = `
         <div class="label">監視機器: STEP 3 (通信不通)</div>
-        <div class="question">状況確認のため、対象PCSに「cmd（コマンド送信）」を実施しました。結果はどうですか？</div>
+        <div class="question">状況確認のため,対象PCSに「cmd（コマンド送信）」を実施しました。結果はどうですか？</div>
         <div class="btn-group">
             <button onclick="renderResult(${stepNum + 1}, '【復旧】通信の回復確認', 'cmd送信によりPCSとの通信が復旧しました。')">cmd送信で復旧した（OK）</button>
             <button onclick="selectNoAlertRoute(${stepNum}, 'comm_fail')">cmdを送信しても応答なし（NG）</button>
@@ -606,7 +602,7 @@ function renderMakerSelection(stepNum) {
 
     node.innerHTML = `
         <div class="label">PCS選択: メーカー選択</div>
-        <div class="question">調査対象 of PCSのメーカーを選択してください。</div>
+        <div class="question">調査対象 of PCS defectsメーカーを選択してください。</div>
         ${buttonsHtml}
     `;
     appendNode(node);
@@ -647,7 +643,7 @@ function selectSmartLogger(stepNum, hasLogger) {
         node.className = 'node';
         node.innerHTML = `
             <div class="label">HUAWEI専用: ローカルログイン調査</div>
-            <div class="question">PC等を接続し、ローカルでSmartLoggerにログインして現状を確認してください。</div>
+            <div class="question">PC等を接続し,ローカルでSmartLoggerにログインして現状を確認してください。</div>
             <div class="btn-group" style="margin-top:15px;">
                 <button onclick="renderAlertCheck(${stepNum + 1})">確認完了（次のステップへ）</button>
             </div>
@@ -677,7 +673,7 @@ function selectOutputControl(stepNum, type) {
     clearSubsequentSteps(stepNum);
 
     if (type === 'SR') {
-        renderResult(stepNum + 1, "【要確認】不要ファイルの蓄積チェック", "出力制御がSR仕様かつSmartLoggerがない構成の場合、内部ストレージ等に不要ファイルが蓄積している可能性があります。");
+        renderResult(stepNum + 1, "【要確認】不要ファイルの蓄積チェック", "出力制御がSR仕様かつSmartLoggerがない構成の場合,内部ストレージ等に不要ファイルが蓄積している可能性があります。");
     } else {
         renderAlertCheck(stepNum + 1);
     }
@@ -727,9 +723,9 @@ function selectNoAlertRoute(stepNum, routeType) {
     clearSubsequentSteps(stepNum);
 
     if (routeType === 'stop') {
-        renderResult(stepNum + 1, "【判断】現地確認が必要です", `アラート表示なしでPCS本体が完全に停止している場合、上位遮断器トリップ、現地手動停止、内部基盤の故障などが疑われます。<br><b style="color:var(--warning-color);">現地へ駆け付け、現場盤および外観の状態を確認してください。</b>`);
+        renderResult(stepNum + 1, "【判断】現地確認が必要です", `アラート表示なしでPCS本体が完全に停止している場合,上位遮断器トリップ,現地手動停止,内部基盤の故障などが疑われます。<br><b style="color:var(--warning-color);">現地へ駆け付け,現場盤および外観の状態を確認してください。</b>`);
     } else {
-        renderResult(stepNum + 1, "【アクション】PCSへcmd送信を実施", `通信が途絶しています。<br><b style="color:var(--accent-color);">対象のPCSへ「応答確認（Ping/再接続指示）」のcmdを送信し、テレメトリが復旧するか確認してください。</b>`);
+        renderResult(stepNum + 1, "【アクション】PCSへcmd送信を実施", `通信が途絶しています。<br><b style="color:var(--accent-color);">対象のPCSへ「応答確認（Ping/再接続指示）」のcmdを送信し,テレメトリが復旧するか確認してください。</b>`);
     }
 }
 
