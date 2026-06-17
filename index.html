@@ -259,7 +259,7 @@ const orderMakers = [
 
 // ボス＆高瀬さんから共有された本物のパワポURLマッピング
 const manualUrls = {
-    "HUAWEI": "https://ergitsol.sharepoint.com/:p:/r/sites/TechnicalSupport/Shared%20Documents/%E8%A8%AD%E7%BD%AE%E3%83%9E%E3%83%8B%E3%83%A5%E3%82%A2%E3%83%AB/Lite/%E3%82%BD%E3%83%BC%E3%83%A9%E3%83%BC%E3%83%A2%E3%83%8B%E3%82%BF%E3%83%BC%E6%A9%9F%E5%99%A8%E8%A8%AD%E7%BD%AE%E6%96%B9%E6%B3%95_Lite_LTE_HUAWEI_FG%EF%BC%88VPN%EF%BC%89_v3.pptx?d=w7fe796cd80834579a20b27e3b4d81a01&csf=1&web=1&e=fGjsvW",
+    "HUAWEI": "https://ergitsol.sharepoint.com/:p:/r/sites/TechnicalSupport/Shared%20Documents/%E8%A8%AD%E7%BD%AE%E3%83%9E%E3%83%8B%E3%83%A5%E3%82%A2%E3%83%AB/Lite/%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%82%BF%E3%83%BC%E6%A9%9F%E5%99%A8%E8%A8%AD%E7%BD%AE%E6%96%B9%E6%B3%95_Lite_LTE_HUAWEI_FG%EF%BC%88VPN%EF%BC%89_v3.pptx?d=w7fe796cd80834579a20b27e3b4d81a01&csf=1&web=1&e=fGjsvW",
     "HUAWEI_no_logger": "https://ergitsol.sharepoint.com/:p:/r/sites/TechnicalSupport/Shared%20Documents/%E8%A8%AD%E7%BD%AE%E3%83%9E%E3%83%8B%E3%83%A5%E3%82%A2%E3%83%AB/Lite/%E3%82%BD%E3%83%BC%E3%83%A9%E3%83%BC%E3%83%A2%E3%83%8B%E3%82%BF%E3%83%BC%E6%A9%9F%E5%99%A8%E8%A8%AD%E7%BD%AE%E6%96%B9%E6%B3%95_Lite_LTE_HUAWEI4.95kW%E7%94%A8%20Smartlogger%E7%84%A1_V4.pptx?d=w20853c92c52147b6a24f1f5518222cb3&csf=1&web=1&e=jOlnYL",
     "SMA_manager": "https://ergitsol.sharepoint.com/:p:/r/sites/TechnicalSupport/Shared%20Documents/%E8%A8%AD%E7%BD%AE%E3%83%9E%E3%83%8B%E3%83%A5%E3%82%A2%E3%83%AB/Lite/%E3%82%BD%E3%83%BC%E3%83%A9%E3%83%BC%E3%83%A2%E3%83%8B%E3%82%BF%E3%83%BC%E6%A9%9F%E5%99%A8%E8%A8%AD%E7%BD%AE%E6%96%B9%E6%B3%95_Lite_LTE_SMA%EF%BC%88%E3%82%A4%E3%83%B3%E3%83%90%E3%83%BC%E3%82%BF%E3%83%9E%E3%83%8D%E3%83%BC%E3%82%B8%E3%83%A3%E3%83%BC%EF%BC%89_v4.pptx?d=w78dc0468c9ea40f8868d3e3e0ba5f82d&csf=1&web=1&e=pjEXeA",
     "SMA_cluster": "https://ergitsol.sharepoint.com/:p:/r/sites/TechnicalSupport/Shared%20Documents/%E8%A8%AD%E7%BD%AE%E3%83%9E%E3%83%8B%E3%83%A5%E3%82%A2%E3%83%AB/Lite/%E3%82%BD%E3%83%BC%E3%83%A9%E3%83%BC%E3%83%A2%E3%83%8B%E3%82%BF%E3%83%BC%E6%A9%9F%E5%99%A8%E8%A8%AD%E7%BD%AE%E6%96%B9%E6%B3%95_Lite_LTE_SMA%EF%BC%88%E3%82%AF%E3%83%A9%E3%82%B3%E3%83%B3%EF%BC%89_v3.pptx?d=wc58ca9a8f2184d31b630b566cad0bbd6&csf=1&web=1&e=eyMHBc",
@@ -281,10 +281,10 @@ const manualUrls = {
     "山洋電気": "https://ergitsol.sharepoint.com/:p:/r/sites/egypt/Shared%20Documents/Solar%20Monitor/%E5%87%BA%E8%8D%B7%E7%AE%A1%E7%90%86%E8%A1%A8/%E8%A8%AD%E7%BD%AE%E3%83%9E%E3%83%8B%E3%83%A5%E3%82%A2%E3%83%AB(ESI)/%E8%A8%AD%E7%BD%AE%E3%83%9E%E3%83%8B%E3%83%A5%E3%82%A2%E3%83%AB%EF%BC%88%E3%83%A1%E3%83%BC%E3%82%AB%E3%83%BC%E5%88%A5%EF%BC%89/%E5%B1%B1%E6%B4%8B%E9%9B%BB%E6%B0%97/%E5%B1%B1%E6%B4%8B%E9%9B%BB%E6%B0%97_LiteBOX.pptx?d=w37cb9a285e234eef9a9827ac81eb7c16&csf=1&web=1&e=iB9gZS"
 };
 
-// 切り分け用データベース（省略なしで維持）
+/* ★ジャービス追加ポイント：指定サイトの情報を元にデルタ電子の代表的なエラーコードを格納★ */
 const masterAlarms = {
     "HUAWEI": {
-        "2001": { name: "2001 ストリング電圧高", title: "【HUAWEI】PVアレイの直列接続構成の確認", text: "DCスイッチがONの場合,PVストリングの直列接続構成を確認してください。" },
+        "2001": { name: "2001 ストリング電圧高", title: "【HUAWEI】PVアレイの直列接続構成 of 確認", text: "DCスイッチがONの場合,PVストリングの直列接続構成を確認してください。" },
         "2009": { name: "2009 ストリングの地絡", title: "【HUAWEI】対地抵抗の測定とDCスイッチ状態確認", text: "絶縁抵抗計を使用して各PVケーブルの対地抵抗を順に測定してください。" }
     },
     "安川電機": {
@@ -292,6 +292,12 @@ const masterAlarms = {
     },
     "オムロン": {
         "E2-3.0": { name: "E2-3.0 直流地絡検出", title: "【オムロン】太陽電池側手動手動絶縁抵抗測定と該当ストリング判断し", text: "入力開閉器をすべてオフにし,絶縁抵抗をDC500Vメガテスタで測定してください。" }
+    },
+    "デルタ電子": {
+        "E10": { name: "E10 / E11 直流過電圧（DC過電圧）", title: "【デルタ電子】直流入力電圧の確認とPV直列数チェック", text: "DC入力電圧がパワコンの許容最大電圧を超えています。PVアレイの開放電圧（Voc）を確認し、回路構成の直列数に誤りがないか検査してください。" },
+        "E19": { name: "E19 絶縁抵抗低下（直流地絡）", title: "【デルタ電子】対地絶縁抵抗（メガー）の測定と地絡箇所の特定", text: "DC側の絶縁抵抗が低下（漏電）しています。ストリング毎にDC500Vテスタを用いて対地絶縁抵抗を測定し、ケーブルの噛み込みやコネクタの水没箇所を特定・修復してください。" },
+        "E21": { name: "E21 系統電圧過上昇（AC過電圧 / OV）", title: "【デルタ電子】系統電圧の上昇チェックと出力制御値の確認", text: "電力系統側のAC電圧が高くなっています。パワコンAC端子台の電圧を測定してください。頻発する場合は、電力会社と協議の上、電圧上昇抑制値の設定変更を検討してください。" },
+        "W01": { name: "W01 系統停電（Grid Loss）", title: "【デルタ電子】AC集電盤ブレーカーおよび停電情報の確認", text: "系統側の電源が途絶しています。対象PCSのACブレーカーや漏電遮断器がトリップしていないか外観確認を行ってください。周辺一帯の停電情報も合わせて確認してください。" }
     }
 };
 
@@ -572,7 +578,6 @@ function renderPcsRunningCheck(stepNum) {
     appendNode(node);
 }
 
-/* ★ジャービス修正ポイント：STEP3の文言、2択の選択肢、およびそれぞれの分岐先アクションを完全反映★ */
 function renderSendCmdCheck(stepNum) {
     const node = document.createElement('div');
     node.className = 'node';
@@ -659,7 +664,7 @@ function renderOutputControlCheck(stepNum) {
     const node = document.createElement('div');
     node.className = 'node';
     node.innerHTML = `
-        <div class="label">HUAWEI専用: 出力制御の確認</div>
+        <div class="label">HUAWEI専用: 出力制御 of 確認</div>
         <div class="question">この現場の出力制御の仕様はどちらですか？</div>
         <div class="btn-group">
             <button onclick="selectOutputControl(${stepNum}, 'SR')">出力制御はSR</button>
