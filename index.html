@@ -572,15 +572,16 @@ function renderPcsRunningCheck(stepNum) {
     appendNode(node);
 }
 
+/* ★ジャービス修正ポイント：STEP3の文言、2択の選択肢、およびそれぞれの分岐先アクションを完全反映★ */
 function renderSendCmdCheck(stepNum) {
     const node = document.createElement('div');
     node.className = 'node';
     node.innerHTML = `
         <div class="label">監視機器: STEP 3 (通信不通)</div>
-        <div class="question">状況確認のため,対象PCSに「cmd（コマンド送信）」を実施しました。結果はどうですか？</div>
+        <div class="question">状況確認のため,対象PCSに「cmd（コマンド送信）」を実施し、結果はどうですか？</div>
         <div class="btn-group">
-            <button onclick="renderResult(${stepNum + 1}, '【復旧】通信の回復確認', 'cmd送信によりPCSとの通信が復旧しました。')">cmd送信で復旧した（OK）</button>
-            <button onclick="selectNoAlertRoute(${stepNum}, 'comm_fail')">cmdを送信しても応答なし（NG）</button>
+            <button onclick="renderResult(${stepNum + 1}, '【判断】有識者への確認（戻り値の確認）', 'コマンドに対する応答（戻り値）が確認できました。取得した戻り値の内容について、仕様がわかる有識者や担当者へ確認してください。')">cmd応答あり</button>
+            <button onclick="renderResult(${stepNum + 1}, '【判断】現地確認（駆け付け）の手配', 'コマンドへの応答がありません。機器のフリーズや物理的な結線異常の可能性があるため、現地での状況確認（再起動やケーブルの確認など）の手配を行ってください。')">cmd応答なし</button>
         </div>
     `;
     appendNode(node);
