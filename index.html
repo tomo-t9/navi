@@ -61,31 +61,36 @@
 const manufacturers = ["HUAWEI", "デルタ電子", "オムロン", "ダイヤゼブラ電機", "安川電機"];
 const orderMakers = ["ABB", "HUAWEI", "IDEC", "JAソーラー", "SMA ※Webコネクト必須", "SolarEdge", "SUN GROW", "エクソル", "オムロン", "カナディアン", "サニックス", "サンテックパワー", "シャープ", "ソーラーフロンティア", "ダイヘン", "ダイヤモンド電機", "デルタ電子", "パナソニック", "安川電機", "山洋電気", "新電元工業", "田淵電機(ダイヤゼブラ電機)"];
 
-// 📥 ここにExcelからコピペしたデータを流し込みます！
+// ★出力制御専用の全メーカーリスト
+const controlManufacturers = ["SolarEdge", "SMA", "Sungrow", "デルタ電子", "日新電機", "日立製作所", "安川電機", "明電舎", "オムロン", "オムロン（SF、CEC限定）", "パナソニック", "HUAWEI", "カナディアンソーラー", "新電元工業"];
+
+// ★提供いただいたすべての型番データを登録完了！
 const controlPcsData = {
-    "HUAWEI": [
-        { model: "SUN2000-4.95KTL-JPL0", status: "対応可能", note: "SmartLogger構成にて対応" },
-        { model: "SUN2000-50KTL-JPM1", status: "対応可能", note: "条件つき対応" }
-    ],
-    "デルタ電子": [
-        { model: "RPI M50J", status: "対応可能", note: "PPM Gateway接続必須" }
-    ],
-    "オムロン": [
-        { model: "KPVシリーズ", status: "対応可能", note: "出力制御ユニット必須" }
-    ],
-    "ダイヤゼブラ電機": [],
-    "安川電機": []
+    "SolarEdge": ["SE3000H-JP", "SE5500-JP", "SE5500H-JP", "SE5500H-JPJ", "SE5500H AC-S", "SE17.5K-JPI", "SE25K-JP", "SE25K-JPJ", "SE25K-JPH", "SE25K-JPI", "SE33.3K-JP", "SE33.3K-JPJ", "SE33.3K-JPI4", "SE33.3K-JPI4I", "SE33.3K-JPI8", "SE33.3K-JPI8I", "SE50K-JP", "SE50K-JPJ", "SE66.6K-JPI4", "SE100K-JP", "SE100K-JPJ", "SE100K-JPI4", "SE25K-JPI300", "SE25K-JPI350"],
+    "SMA": ["SB 3500TL-JP-22/MP", "SB 4500TL-JP-22/MP", "SB 5400TL-JP-22/MP", "SB 3500TL-JP-22", "SB 4500TL-JP-22", "STP 10000TLEE-JP-10", "STP 10000TLEE-JP-10/V0168", "STP 10000TLEE-JP-11", "STP 20000TLEE-JP-11", "STP 24500TL-JP-30", "STP 25000TL-JP-30", "STP 50-JP-40", "STP 60-JP-10", "SHP 100-JP-20", "SHP 143-JP-20", "SC 500CP-10-JP", "SC 630CP-10-JP", "SC 800CP-10-JP", "SC 1000CP-10-JP"],
+    "Sungrow": ["SG5.5RS-JP", "SG33K3J(CSI-33.3KTL)", "SG49K5J(LP-P49KSG)", "SG100CX-JP", "SG111HV", "SG49.5CX-JP", "SG125HX-JP", "SG50CX-P2-JP"],
+    "デルタ電子": ["RPI H4J(P)", "RPI H4J", "TPV-H4J-M2", "RPI H4.5J(P)", "RPI H4.5J", "TPD-H45-M3", "RPI H5.5J(P)", "RPI H5.5J", "RPI H6J(P)", "RPI H6J", "TPD-H59-M4", "RPI H6J-4", "RPI H6J-3", "RPI H10J", "M16S", "RPI M16A", "RPI M20A", "RPI M50J", "RPI M50A_120", "RPI M50A", "TPV-H45-M3", "TPV-H59-M4", "RPI M16S", "M70A_260", "M88H_122", "M125HV"],
+    "日新電機": ["SPCS500-1", "SPCS660-1", "SPCS750-1", "SPCS1000-1", "SPM〇〇〇-CS1B", "SPM250-CS1 の一部の既納品", "SPM100-CS1A", "SPM250-CS1", "SPM100-CS1B", "SPM250-CS1B", "SPM500-CS1B", "SPM660-CS1B"],
+    "日立製作所": ["HIVERTER-NP203i(Ethernet)", "HIVERTER-NP203i(RS485)", "HIVERTER-NP213i(Ethernet)", "HIVERTER-NP213i(RS485)"],
+    "安川電機": ["CEPT-P3AA2025B", "CEPT-P3AB2025B", "CEPT-P2AA2010B", "CEPT-P2AA2010C", "CEPT-P2AA29P9B", "CEPT-P2AA29P9C", "CEPT-P2AAB010B", "CEPT-P2AAB010C", "CEPT-P2AAB9P9B", "CEPT-P2AAB9P9C", "CEPT-P2HA29P9B", "CEPT-P2HA29P9C", "CEPT-L1AA4P5", "CEPT-L1AB4P5", "CEPT-L1AA5P8", "CEPT-L1AB5P8", "CEPT-S1AA4P5", "CEPT-S1AA5P8", "CEPT-V1AA□□□", "CEPT-P1HD2100DMA", "CEPT-P1HD4100DMB"],
+    "明電舎": ["SP300-250", "SP300-250T", "SP310-250T", "SP310-250T-N", "SP310-250T-FN", "SP310-250T-FG", "SP310-100T-FN", "SP310-100T-FG", "SP310-250T-DN", "SP310-250T-DG", "SP310-100T-DN", "SP310-100T-DG", "SP320-250T-N", "SP320-250T-G", "SP320-100T-N", "SP320-100T-G"],
+    "オムロン": ["KPW-A55-J4", "KPW-A55-SJ4", "KPW-A55-2PJ4", "KPW-A55-2J4", "KPW-A55-2SPJ4", "KPW-A55-2SJ4", "KPW-A55-J4-M", "KPW-A55-SJ4-M", "KPW-A55-2PJ4-M", "KPW-A55-2J4-M", "KPW-A55-2SPJ4-M", "KPW-A55-2SJ4-M", "KPV-A55-J4", "KPV-A55-SJ4", "KPV-A55-J4-SS", "KPV-A55-J4-HQ", "KPV-A55-J4-W", "CSR55G1E", "KPM-A48-J4", "KPW-A48-J4"],
+    "オムロン（SF、CEC限定）": ["KPM-A55-J4", "KPW-A55-J4", "KPW-A55-SJ4", "KPW-A55-2PJ4", "KPW-A55-2J4", "KPW-A55-2SPJ4", "KPW-A55-2SJ4", "KPW-A55-J4-M", "KPW-A55-SJ4-M", "KPW-A55-2PJ4-M", "KPW-A55-2J4-M", "KPW-A55-2SPJ4-M", "KPW-A55-2SJ4-M", "KPV-A55-J4", "KPV-A55-SJ4", "KPV-A55-J4-SS", "KPV-A55-J4-HQ", "KPV-A55-J4-W", "CSR55G1E", "KPM-A48-J4", "KPW-A48-J4", "KP44K3-SS-A", "KP55K3-SS-A", "KP44M-J4-SS-A", "KP55M-J4-SS-A", "KP44M-SJ4", "KP55M-SJ4", "KP44M-A", "KP55M-A", "KP44M-J4-A", "KP55M-J4-A", "KP44M-PJ4-A", "KP55M-PJ4-A", "KP44M2-J4-SS-A", "KP55M2-J4-SS-A", "KP44M2-SJ4", "KP55M2-SJ4", "KP44M2", "KP55M2", "KP44M2-J4", "KP55M2-J4", "KP44M-M2-PJ4", "KP55M2-PJ4", "KP48R-J3-SS-A", "KP59R-J4-SS-A", "KP48R-J3-A", "KP59R-J4-A"],
+    "パナソニック": ["VBPC255NC2", "SSITL55E1CS", "CSP55N1F", "HQJP-KA55-3", "SPUS-55D-NX", "SPUS-55D-SN", "SPUS-55D-DM", "YL-SPUS-55D", "GP55G", "LP-P55LS-SDB", "EH055P-C1", "SPC2-IS55", "VBPC240NC2", "SSITL40E1CS", "CSP40N1F", "HQJP-KA40-3", "SPUS-40D-NX", "SPUS-40D-SN", "SPUS-40D-DM", "YL-SPUS-40D", "GP40G", "LP-P40LS-SDB", "EH040P-C1", "SPC2-IS40", "VBPC244GM2", "SSITL44B4CS", "CSP44G4F", "HQJP-RA44-3", "SPC2-OM44", "SPSM-444B-NX", "SPSM-444B-SN", "SPSM-444BS-SN", "SPSM-444B-DM", "YL-SPSM4-44B", "YLE-TL44C", "GPR44B", "LP-P44LH-SDB", "SPSM-444B-LP", "EH044M-C1", "VBPC244GM2S", "SPC2-OM44S", "VBPC255GM2", "SSITL55B4CS", "CSP55G4F", "HQJP-RA55-3", "SPC2-OM55", "SPSM-554B-NX", "SPSM-554B-SN", "SPSM-554BS-SN", "SPSM-554B-DM", "YL-SPSM4-55B", "YLE-TL55C", "GPR55B", "LP-P55LH-SDB", "SPSM-554B-LP", "EH055M-C1", "VBPC255GM2S", "SPC2-OM55S", "VBPC255GS2", "CSP55G1H", "HQJP-MA55-3", "SPSS-55E-NX", "SPSS-55E-SN", "SPSS-55E-DM", "GPS55D", "YL-SPSS-55E", "SPSS-55E-LP", "EH055B-C1", "VBPC255GS2S", "VBPC255NC3", "HQJP-KA55-5", "CSP55N1K", "GP55H", "SPUS-55E-SN", "SSITL55E2CS", "SPUS-55E-NX", "SPC2-IS55K", "VBPC240NC3", "HQJP-KA40-5", "CSP40N1K", "GP40H", "SPUS-40E-SN", "SSITL40E2CS", "SPUS-40E-NX", "SPC2-IS40K", "SPUS-40E-DM", "VBPC244GM2T", "CSP44G4J", "HQJP-RA44-4", "SPSM-444C-NX", "VBPC255GM2T", "CSP55G4J", "HQJP-RA55-4", "SPSM-554C-NX", "JH-55RP4", "VBPC255GM3T", "HQJP-RA55-5", "CSP55G4K", "SPSM-554D-NX", "SSITL55B5CS", "SPSM-554D-SN", "GPR55C", "JH-55SP4", "VBPC244GM3T", "HQJP-RA44-5", "CSP44G4K", "SPSM-444D-NX", "SSITL44B5CS", "SPSM-444D-SN", "GPR44C", "VBPC255GM4T", "GPR55E", "HWJP-RA55-6", "CSP55G4L", "SSITL55B6CS", "SPSM-554F-NX", "SPC3-OM55", "JH-55TP4", "SPSM-554CS-SN", "SPSM-554C-LP", "SPSM-554C-DM", "VBPC244GM4T", "GPR44E", "HWJP-RA44-6", "CSP44G4L", "SSITL44B6CS", "SPSM-444F-NX", "SPC3-OM44", "SPSM-444CS-SN", "SPSM-444C-LP", "SPSM-444C-DM", "VBPC255GM4", "GPR55D", "SPSM-554E-NX", "YLE-TL55D", "VBPC244GM4", "GPR44D", "SPSM-444E-NX", "YLE-TL44D", "VBPC255NC4", "GP55J", "HWJP-KA55-6", "CSP55N1L", "SPUS-55F-SN", "SSITL55E3CS", "SPUS-55F-NX", "SPC3-IS55", "SPUS-55F-LP", "SPUS-55F-DM", "VBPC240NC4", "GP40J", "HWJP-KA40-6", "CSP40N1L", "SPUS-40F-SN", "SSITL40E3CS", "SPUS-40F-NX", "SPC3-IS40", "SPUS-40F-LP", "SPUS-40F-DM"],
+    "HUAWEI": ["SUN2000-4.95KTL-NHL2", "SUN2000-4.95KTL-JPL1", "SUN2000L-4.125KTL-JP", "SUN2000L-4.95KTL-JP", "SUN2000-4.95KTL-JPL0", "SUN2000-4.95KTL-JPL1", "SUN2000-4.95KTL-NHL2", "SUN2000-24.5KTL", "SUN2000-28KTL", "SUN2000-20KTL-M3", "SUN2000-33KTL-JP", "SUN2000-33KTL-NH", "SUN2000-40KTL-JP", "SUN2000-40KTL-NH", "SUN2000-50KTL-JPM0", "SUN2000-50KTL-NHM3", "SUN2000-50KTL-JPM1", "SUN2000-63KTL-JPM0", "SUN2000-62.5KTL-NHM0", "SUN2000-111KTL-NHM0", "SUN2000-63KTL-JPH0", "SUN2000-125KTL-JPH0", "LUNA2000-100KTL-M1", "LUNA2000-100KTL-NHH1", "SUN2000-125KTL-NHM0", "SUN2000-188KTL-NHH0", "PCS2000-108K-MB1", "LUNA2000-213KTL-H0", "SUN2000-4.95K-LB0-NH"],
+    "カナディアンソーラー": ["CSI-50K-T4401A-J", "CSI-62.5K-T4401A-J"],
+    "新電元工業": ["PVS010T200B-SA", "PVS010T200B-SK-SA", "PVS010T200B-SA-PFG", "PVS010T200B-SA-NFG", "PVS010T200B-SK-PFG", "PVS010T200B-SK-SA-NFG", "PVS9R9T200B-SA", "PVS9R9T200B-SK-SA", "PVS9R9T200B-SA-PFG", "PVS9R9T200B-SA-NFG", "PVS9R9T200B-SK-SA-PFG", "PVS9R9T200B-SK-SA-NFG", "PVS010T200B", "PVS010T200B-SK", "PVS010T200B-PFG", "PVS010T200B-NFG", "PVS010T200B-SK-PFG", "PVS010T200B-SK-NFG", "PVS9R9T200B", "PVS9R9T200B-SK", "PVS9R9T200B-PFG", "PVS9R9T200B-NFG", "PVS9R9T200B-SK-PFG", "PVS9R9T200B-SK-NFG", "PVS012T200B-SA", "PVS012T200B-SK-SA", "PVS012T200B-SA-PFG", "PVS012T200B-SA-NFG", "PVS012T200B-SK-SA-PFG", "PVS012T200B-SK-SA-NFG", "PVS012T200B", "PVS012T200B-SK", "PVS012T200B-PFG", "PVS012T200B-NFG", "PVS012T200B-SK-PFG", "PVS012T200B-SK-NFG"]
 };
 
 const manualUrls = {
-    "HUAWEI": "https://ergitsol.sharepoint.com/:p:/r/sites/TechnicalSupport/Shared%20Documents/%E8%A8%AD%E7%BD%AE%E3%83%9E%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E6%A9%9F%E5%99%A8%E8%A8%AD%E7%BD%AE%E6%96%B9%E6%B3%95_Lite_LTE_HUAWEI_FG%EF%BC%88VPN%EF%BC%89_v3.pptx?d=w7fe796cd80834579a20b27e3b4d81a01&csf=1&web=1&e=fGjsvW",
+    "HUAWEI": "https://ergitsol.sharepoint.com/:p:/r/sites/TechnicalSupport/Shared%20Documents/%E8%A8%AD%E7%BD%AE%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E6%A9%9F%E5%99%A8%E8%A8%AD%E7%BD%AE%E6%96%B9%E6%B3%95_Lite_LTE_HUAWEI_FG%EF%BC%88VPN%EF%BC%89_v3.pptx?d=w7fe796cd80834579a20b27e3b4d81a01&csf=1&web=1&e=fGjsvW",
     "HUAWEI_no_logger": "https://ergitsol.sharepoint.com/:p:/r/sites/TechnicalSupport/Shared%20Documents/%E8%A8%AD%E3%20%A2%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E6%A9%9F%E5%99%A8%E8%A8%AD%E7%BD%AE%E6%96%B9%E6%B3%95_Lite_LTE_HUAWEI4.95kW%E7%94%A8%20Smartlogger%E7%84%A1_V4.pptx?d=w20853c92c52147b6a24f1f5518222cb3&csf=1&web=1&e=jOlnYL",
-    "SMA_manager": "https://ergitsol.sharepoint.com/:p:/r/sites/TechnicalSupport/Shared%20Documents/%E8%A8%AD%E3%20%A2%E3%20%A2%E3%83%BC%E3%20%A2%E3%83%BC%E3%20%A2%E3%83%BC%E3%20%A2%E3%83%BC%E3%20%A2%E3%83%BC%E3%20%A2%E3%83%BC%E3%20%A2%E3%83%BC%E3%20%A2%E3%83%BC%E3%20%A2%E3%83%BC%E3%20%A2%E3%83%BC%E3%20%A2%E3%20%A2%E3%20%A2%E3%20%A2%E3%20%A2%E3%20%A2%E3%20%A2%E3%20%A2%EF%BC%89_v4.pptx",
-    "SMA_cluster": "https://ergitsol.sharepoint.com/:p:/r/sites/TechnicalSupport/Shared%20Documents/%E8%A8%AD%E3%20%A2%E3%20%A2%E3%83%BC%E3%20%A2%EF%BC%88%E3%20%AF%E3%20%A2%E3%20%A2%EF%BC%89_v3.pptx",
-    "SMA_control": "https://ergitsol.sharepoint.com/:p:/r/sites/TechnicalSupport/Shared%20Documents/%E8%A8%AD%E3%20%A2%E3%20%A2%E3%83%BC%E3%20%A2%EF%BC%88%E5%87%BA%E5%8A%9B%E5%88%B6%E5%BE%A1%E3%81%AF%E3%82%8B%EF%BC%89_v3.pptx",
-    "SMA_fg": "https://ergitsol.sharepoint.com/:p:/r/sites/TechnicalSupport/Shared%20Documents/%E8%A8%AD%E3%20%A2%E3%20%A2%E3%83%BC%E3%20%A2%E6%A9%9F%E5%99%A8%E8%A8%AD%E7%BD%AE%E6%96%B9%E6%B3%95_Lite_LTE_SMA_Original_v3.pptx",
-    "Omron_fg": "https://ergitsol.sharepoint.com/:p:/r/sites/TechnicalSupport/Shared%20Documents/%E8%A8%AD%E3%20%A2%E3%20%A2%E3%83%BC%E3%20%A2%E6%A9%9F%E5%99%A8%E8%A8%AD%E7%BD%AE%E6%96%B9%E6%B3%95_Lite_LTE_%E3%20%A2%E3%20%A2%E3%20%A2%E3%20%A2%E3%20%A2%E3% 2%A2%E3% 2%A2%E3% 2%A2%EF%BC%88KPV%EF%BC%89%E5%87%BA%E5%8A%9B%E5%88%B6%E5%BE%A1%E3%81%B5%E3%81%94_FG_v2.pptx",
-    "Omron_other_unit": "https://ergitsol.sharepoint.com/:p:/r/sites/TechnicalSupport/Shared%20Documents/%E8%A8%AD%E3%20%A2%E3%20%A2%E3%20%A2%E6%A9%9F%E5%99%A8%E8%A8%AD%E7%BD%AE%E6%96%B9%E6%B3%95_Lite_LTE_%E3%20%A2%E3%20%A2%E3% 2%A2%E3% 2%A2%E3% 2%A2%E3% 2%A2%E3% 2%A2%EF%BC%88%E4%BB%96%E7%A4%BE%E3%83%A6%E3%83%8B%E3%83%83%E3%83%88%EF%BC%89_KPV_v4.pptx",
+    "SMA_manager": "https://ergitsol.sharepoint.com/:p:/r/sites/TechnicalSupport/Shared%20Documents/%E8%A8%AD%E3%20%A2%E3%20%A2%E3%83%BC%E3%20%A2%E3%83%BC%E3%20%A2%E3%83%BC%E3%20%A2%E3%83%BC%E3%20%A2%E3%83%BC%E3%20%A2%E3%83%BC%E3%20%A2%E3%83%BC%E3%20%A2%E3%83%BC%E3%20%A2%E3%20%A2%E3%20%A2%E3%20%A2%E3%20%A2%E3%20%A2%E3%20%A2%EF%BC%89_v4.pptx",
+    "SMA_cluster": "https://ergitsol.sharepoint.com/:p:/r/sites/TechnicalSupport/Shared%20Documents/%E8%A8%AD%E3%20%A2%E3%20%A2%E3%83%BC%E3% 2%A2%EF%BC%88%E3% 2%AF%E3% 2%A2%E3% 2%A2%EF%BC%89_v3.pptx",
+    "SMA_control": "https://ergitsol.sharepoint.com/:p:/r/sites/TechnicalSupport/Shared%20Documents/%E8%A8%AD%E3%20%A2%E3%20%A2%E3% 2%A2%EF%BC%88%E5%87%BA%E5%8A%9B%E5%88%B6%E5%BE%A1%E3%81%AF%E3%82%8B%EF%BC%89_v3.pptx",
+    "SMA_fg": "https://ergitsol.sharepoint.com/:p:/r/sites/TechnicalSupport/Shared%20Documents/%E8%A8%AD%E3%20%A2%E3%20%A2%E3% 2%A2%E6%A9%9F%E5%99%A8%E8%A8%AD%E7%BD%AE%E6%96%B9%E6%B3%95_Lite_LTE_SMA_Original_v3.pptx",
+    "Omron_fg": "https://ergitsol.sharepoint.com/:p:/r/sites/TechnicalSupport/Shared%20Documents/%E8%A8%AD%E3%20%A2%E3%20%A2%E3% 2%A2%E6%A9%9F%E5%99%A8%E8%A8%AD%E7%BD%AE%E6%96%B9%E6%B3%95_Lite_LTE_%E3%20%A2%E3% 2%A2%E3% 2%A2%E3% 2%A2%E3% 2%A2%E3% 2%A2%E3% 2%A2%E3% 2%A2%E3% 2%A2%EF%BC%88KPV%EF%BC%89%E5%87%BA%E5%8A%9B%E5%88%B6%E5%BE%A1%E3%81%B5%E3%81%94_FG_v2.pptx",
+    "Omron_other_unit": "https://ergitsol.sharepoint.com/:p:/r/sites/TechnicalSupport/Shared%20Documents/%E8%A8%AD%E3%20%A2%E3%20%A2%E3% 2%A2%E6%A9%9F%E5%99%A8%E8%A8%AD%E7%BD%AE%E6%96%B9%E6%B3%95_Lite_LTE_%E3%20%A2%E3% 2%A2%E3% 2%A2%E3% 2%A2%E3% 2%A2%E3% 2%A2%E3% 2%A2%EF%BC%88%E4%BB%96%E7%A4%BE%E3%83%A6%E3%83%8B%E3%83%83%E3%83%88%EF%BC%89_KPV_v4.pptx",
     "Tabuchi_3phase": "https://ergitsol.sharepoint.com/:p:/r/sites/TechnicalSupport/Shared%20Documents/%E8%A8%AD%E3%20%A2%E3%20%A2%E3% 2%A2%E6%A9%9F%E5%99%A8%E8%A8%AD%E7%BD%AE%E6%96%B9%E6%B3%95_Lite_LTE_%E7%94%B0%E6%B7%B5%E9%9B%BB%E6%A9%9F%EF%BC%88%E4%B8%89%E7%9B%B8%EF%BC%89FG_v3.pptx",
     "Tabuchi_1phase": "https://ergitsol.sharepoint.com/:p:/r/sites/TechnicalSupport/Shared%20Documents/%E8%A8%AD%E3%20%A2%E3%20%A2%E3% 2%A2%E6%A9%9F%E5%99%A8%E8%A8%AD%E7%BD%AE%E6%96%B9%E6%B3%95_Lite_LTE_%E7%94%B0%E6%B7%B5%E9%9B%BB%E6%A9%9F%EF%BC%88%E5%83%85%E7%9B%B8%EF%BC%89_v3.pptx",
     "Suntech": "https://ergitsol.sharepoint.com/:p:/r/sites/TechnicalSupport/Shared%20Documents/%E8%A8%AD%E3%20%A2%E3%20%A2%E3% 2%A2%E6%A9%9F%E5%99%A8%E8%A8%AD%E7%BD%AE%E6%96%B9%E6%B3%95_Lite_LTE_%EF%BD%BB%EF%BE%9D%EF%BE%83%EF%BD%AF%EF%BD%B8_%EF%BE%8A%EF%BE%9F%EF%BE%85%EF%BD%BF%EF%BE%86%EF%BD%AF%EF%BD%B8_%EF%BE%98%EF%BD%B0%EF%BE%8C%EF%BE%9F%EF%BE%84%EF%BE%9D_%EF%BE%88%EF%BD%B8%EF%BD%BD%EF%BE%84%EF%BD%B4%EF%BE%85%EF%BD%BC%EF%BE%9E%EF%BD%B0.FG_v3.pptx",
@@ -137,7 +142,7 @@ const masterAlarms = {
         "ge32": { name: "GE32 太陽電池過電圧(入力3)", title: "【デルタ】太陽電池過電圧(入力3)", text: "【原因】PV3入力過電圧。【対処】入力ストリング直列数の確認と開放電圧チェック。" },
         "ge33": { name: "GE33 太陽電池過電圧(入力4)", title: "【デルタ】太陽電池過電圧(入力4)", text: "【原因】PV4入力過電圧。【対処】ストリング直列数・回路構成のチェック。" },
         "ge34": { name: "GE34 絶縁異常", title: "【デルタ】絶縁異常（DC側）", text: "【原因】DC側の配線・絶縁に問題。【対処】DC配線の外観点検、対地絶縁抵抗の測定。" },
-        "gf01": { name: "GF01 直流分検出1", title: "【デルタ】直流分検出1", text: "【原因】出力電流に直流分検出。【対処】付近のインバーター負荷等から離す、再起動。" },
+        "gf01": { name: "GF01 直流分検出1", title: "【デルタ】直流分検出1", text: "【原因】出力電流に直流分検出。【対処】付近 of インバーター負荷等から離す、再起動。" },
         "gf02": { name: "GF02 直流分検出2", title: "【デルタ】直流分検出2", text: "【原因】出力の直流分検出。【対処】周辺負荷環境確認、直らない場合はメーカーへ。" },
         "gf03": { name: "GF03 直流分検出3", title: "【デルタ】直流分検出3", text: "【原因】出力の直流分検出。【対処】周辺環境確認、スイッチ再投入。" },
         "gf04": { name: "GF04 直流分検出4", title: "【デルタ】直流分検出4", text: "【原因】直流分の検出異常。【対処】AC/DC再投入。改善しない場合はメーカーへ。" },
@@ -155,7 +160,7 @@ const masterAlarms = {
         "gf18": { name: "GF18 制御信号異常4", title: "【デルタ】制御フィードバック異常4", text: "【原因】制御信号エラー。【対処】DCスイッチ入れ直し、配線点検。" },
         "gf19": { name: "GF19 制御信号異常5", title: "【デルタ】制御フィードバック異常5", text: "【原因】制御回路異常。【対処】再起動、解消しない場合はメーカーへ。" },
         "gf20": { name: "GF20 変換効率異常", title: "【デルタ】変換効率異常", text: "【原因】内部回路故障による効率異常。【対処】配線確認、直らない場合はメーカー。" },
-        "gf22": { name: "GF22 内部通信異常(2)", title: "【デルタ】内部通信異常(2)", text: "【原因】内部基板間の通信エラー。【対処}配線状態確認、AC/DCスイッチ再投入。" },
+        "gf22": { name: "GF22 内部通信異常(2)", title: "【デルタ】内部通信異常(2)", text: "【原因】内部基板間の通信エラー。【対処】配線状態確認、AC/DCスイッチ再投入。" },
         "gf23": { name: "GF23 内部通信異常(1)", title: "【デルタ】内部通信異常(1)", text: "【原因】内部通信エラー。【対処】AC/DCスイッチ入れ直し、メーカーへ連絡。" },
         "gf24": { name: "GF24 直流地絡の異常", title: "【デルタ】直流地絡の異常", text: "【原因】DC側の漏電・地絡。【対処】入力ストリングの絶縁を測定、漏電箇所特定。" },
         "gf26": { name: "GF26 内部電源異常", title: "【デルタ】内部電源異常", text: "【原因】内部電源回路の故障。【対処】配線状態点検、AC/DC再投入、メーカーへ。" },
@@ -215,7 +220,7 @@ const masterAlarms = {
         "f-9030016": { name: "F-9030016 パワコン過負荷 (OL2)", title: "【安川】パワコン過負荷 (OL2)", text: "自立出力負荷の容量過大。接続している電気機器を減らしてください。" },
         "ol2": { name: "パワコン過負荷 (OL2)", title: "【安川】パワコン過負荷 (OL2)", text: "自立出力過負荷（F-9030016）。接続機器を減らして負荷を下げてください。" },
         "f-9030017": { name: "F-9030017 出力過電流1 (OC1)", title: "【安川】出力過電流1 (OC1)", text: "出力過電流。配線ミスやケーブル破損点検。自立時は負荷減少。自動復帰。" },
-        "oc1": { name: "出力過電流1 (OC1)", title: "【安川】出力過電流1 (OC1)", text: "過電流検知.配線・破損の確認。自立時は接続負荷の容量減少（F-9030017）。" },
+        "oc1": { name: "出力過電流1 (OC1)", title: "【安川】出力過電流1 (OC1)", text: "過電流検知。配線・破損の確認。自立時は接続負荷の容量減少（F-9030017）。" },
         "f-9030023": { name: "F-9030023 通信異常 (CE)", title: "【安川】通信異常 (CE)", text: "配線ミス・短絡・断線、通信データ異常。配線点検、主回路・接地線のノイズ対策。" },
         "ce": { name: "通信異常 (CE)", title: "【安川】通信異常 (CE)", text: "通信異常（F-9030023）。配線ミス・短絡・断線の確認、ノイズ対策。" },
         "f-9030027": { name: "F-9030027 直流過電圧 (OVB2)", title: "【安川】直流過電圧 (OVB2)", text: "太陽電池電圧の異常上昇。太陽電池ストリングの配線ミス・直列数過多を確認。" },
@@ -249,7 +254,7 @@ const masterAlarms = {
         "e1-3": { name: "e1-3 周波数上昇検出", title: "【オムロン】系統周波数上昇検出", text: "商用系統の周波数上昇。商用系統が正常値に戻ることで自動運転再開。" },
         "e1-4": { name: "e1-4 周波数低下検出", title: "【オムロン】系統周波数低下検出", text: "商用系統の周波数低下。商用系統が正常値に戻ることで自動運転再開。" },
         "e1-5": { name: "e1-5 単独運転検出(受動)", title: "【オムロン】単独運転検出（受動）", text: "周波数異常で受動方式単独運転検出作動。系統正常化で自動再開。" },
-        "e1-6": { name: "e1-6 単独運転検出(能動)", title: "【オムロン】単独運転検出（能動）", text: "周波数異常で能動方式単独運転検出作動。系統正常化で自動再開。" },
+        "e1-6": { name: "e1-6 単独運転検出(能動)", title: "【オムロン】単独運転検出（能動）", text: "周波数異常で能動方式単独運転検出作動.系統正常化で自動再開。" },
         "e1-7": { name: "e1-7 瞬時過電圧検出", title: "【オムロン】商用系統の瞬時過電圧", text: "商用系統の電圧が瞬間上昇。自動復帰待ち。直らない場合は連絡。" },
         "e1-8": { name: "e1-8 瞬時電圧低下検出", title: "【オムロン】商用系統の瞬時電圧低下", text: "商用系統の電圧が瞬間低下。自動復帰待ち。大型負荷始動影響など。" },
         "e2-1": { name: "e2-1 太陽電池過電圧", title: "【オムロン】太陽電池過電圧検出", text: "DC側の入力電圧過大。故障リスクあり。直ちに直列数構成を確認。" },
@@ -289,7 +294,7 @@ function renderControlMakerSelection(stepNum) {
     const node = document.createElement('div');
     node.className = 'node';
     let buttonsHtml = '<div class="grid-buttons">';
-    manufacturers.forEach(maker => {
+    controlManufacturers.forEach(maker => {
         buttonsHtml += `<button onclick="selectControlMaker(${stepNum}, '${maker}')">${maker}</button>`;
     });
     buttonsHtml += '</div>';
@@ -297,7 +302,6 @@ function renderControlMakerSelection(stepNum) {
     appendNode(node);
 }
 
-// 🔍 メーカー選択後に型番を「リアルタイム検索」できる機能
 function selectControlMaker(stepNum, maker) {
     highlightButton(maker);
     clearSubsequentSteps(stepNum);
@@ -335,13 +339,13 @@ function filterControlPcs() {
         ul.style.paddingLeft = '0';
         ul.style.margin = '0';
         
-        pcsList.forEach(pcs => {
-            if (input === '' || pcs.model.toLowerCase().includes(input) || pcs.note.toLowerCase().includes(input)) {
+        pcsList.forEach(model => {
+            if (input === '' || model.toLowerCase().includes(input)) {
                 matchCount++;
                 let li = document.createElement('li');
                 li.style.padding = '10px 15px';
                 li.style.borderBottom = '1px solid var(--border-color)';
-                li.innerHTML = `🔳 <strong style="color:var(--accent-color);">${pcs.model}</strong> <span style="font-size:0.8rem; margin-left:8px; padding:2px 6px; background:rgba(46,164,79,0.2); color:var(--success-color); border-radius:4px;">${pcs.status}</span><br><span style="font-size:0.85rem; color:#8b949e; display:block; margin-top:4px; margin-left:24px;">備考: ${pcs.note}</span>`;
+                li.innerHTML = `🔳 <strong style="color:var(--accent-color);">${model}</strong> <span style="font-size:0.8rem; margin-left:8px; padding:2px 6px; background:rgba(46,164,79,0.2); color:var(--success-color); border-radius:4px;">対応可能</span>`;
                 ul.appendChild(li);
             }
         });
@@ -352,7 +356,7 @@ function filterControlPcs() {
     }
     
     if (matchCount === 0) {
-        container.innerHTML = `<div class="no-result">該当する型式が見つかりません（データ未登録）。</div>`;
+        container.innerHTML = `<div class="no-result">該当する型式が見つかりません。</div>`;
     }
 }
 
