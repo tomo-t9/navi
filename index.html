@@ -50,39 +50,56 @@
             <div class="btn-group">
                 <button onclick="selectRoot(1, 'triage')" style="border-color: var(--warning-color); color: var(--warning-color);">⚠️ 障害の切り分け (PCS/監視機器)</button>
                 <button onclick="selectRoot(1, 'order')" style="border-color: var(--accent-color); color: var(--accent-color);">📦 新規の機器手配 (マニュアル構成)</button>
+                <!-- ★新設：出力制御対応可能PCSボタン -->
+                <button onclick="selectRoot(1, 'control')" style="border-color: var(--success-color); color: var(--success-color);">📡 出力制御対応可能PCS</button>
             </div>
         </div>
     </div>
-    <button class="reset-btn" onclick="resetFlow()" style="display:none;" id="reset-btn">最初からやり直す</button>
+    <button class="reset-btn" onclick="resetFlow()" style="display:none;" id="reset-btn">最初からやり難す</button>
 </div>
 
 <script>
 const manufacturers = ["HUAWEI", "デルタ電子", "オムロン", "ダイヤゼブラ電機", "安川電機"];
 const orderMakers = ["ABB", "HUAWEI", "IDEC", "JAソーラー", "SMA ※Webコネクト必須", "SolarEdge", "SUN GROW", "エクソル", "オムロン", "カナディアン", "サニックス", "サンテックパワー", "シャープ", "ソーラーフロンティア", "ダイヘン", "ダイヤモンド電機", "デルタ電子", "パナソニック", "安川電機", "山洋電気", "新電元工業", "田淵電機(ダイヤゼブラ電機)"];
 
-const manualUrls = {
-    "HUAWEI": "https://ergitsol.sharepoint.com/:p:/r/sites/TechnicalSupport/Shared%20Documents/%E8%A8%AD%E7%BD%AE%E3%83%9E%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E6%A9%9F%E5%99%A8%E8%A8%AD%E7%BD%AE%E6%96%B9%E6%B3%95_Lite_LTE_HUAWEI_FG%EF%BC%88VPN%EF%BC%89_v3.pptx?d=w7fe796cd80834579a20b27e3b4d81a01&csf=1&web=1&e=fGjsvW",
-    "HUAWEI_no_logger": "https://ergitsol.sharepoint.com/:p:/r/sites/TechnicalSupport/Shared%20Documents/%E8%A8%AD%E7%BD%AE%E3%20%A2%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E6%A9%9F%E5%99%A8%E8%A8%AD%E7%BD%AE%E6%96%B9%E6%B3%95_Lite_LTE_HUAWEI4.95kW%E7%94%A8%20Smartlogger%E7%84%A1_V4.pptx?d=w20853c92c52147b6a24f1f5518222cb3&csf=1&web=1&e=jOlnYL",
-    "SMA_manager": "https://ergitsol.sharepoint.com/:p:/r/sites/TechnicalSupport/Shared%20Documents/%E8%A8%AD%E7%BD%AE%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A4%E3%83%B3%E3%83%90%E3%83%BC%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%83%BC%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%83%BC%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E6%A9%9F%E5%99%A8%E8%A8%AD%E7%BD%AE%E6%96%B9%E6%B3%95_Lite_LTE_SMA%EF%BC%88%E3%20%A4%E3%83%B3%E3%83%90%E3%83%BC%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%83%BC%EF%BC%89_v4.pptx",
-    "SMA_cluster": "https://ergitsol.sharepoint.com/:p:/r/sites/TechnicalSupport/Shared%20Documents/%E8%A8%AD%E7%BD%AE%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%EF%BC%88%E3%20%AF%E3%83%A9%E3%82%B3%E3%83%B3%EF%BC%89_v3.pptx",
-    "SMA_control": "https://ergitsol.sharepoint.com/:p:/r/sites/TechnicalSupport/Shared%20Documents/%E8%A8%AD%E7%BD%AE%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%EF%BC%88%E5%87%BA%E5%8A%9B%E5%88%B6%E5%BE%A1%E3%81%82%E3%82%8A%EF%BC%89_v3.pptx",
-    "SMA_fg": "https://ergitsol.sharepoint.com/:p:/r/sites/TechnicalSupport/Shared%20Documents/%E8%A8%AD%E7%BD%AE%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E6%A9%9F%E5%99%A8%E8%A8%AD%E7%BD%AE%E6%96%B9%E6%B3%95_Lite_LTE_SMA_Original_v3.pptx",
-    "Omron_fg": "https://ergitsol.sharepoint.com/:p:/r/sites/TechnicalSupport/Shared%20Documents/%E8%A8%AD%E7%BD%AE%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E6%A9%9F%E5%99%A8%E8%A8%AD%E7%BD%AE%E6%96%B9%E6%B3%95_Lite_LTE_%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%EF%BC%88KPV%EF%BC%89%E5%87%BA%E5%8A%9B%E5%88%B6%E5%BE%A1%E3%81%B5%E3%81%94_FG_v2.pptx",
-    "Omron_other_unit": "https://ergitsol.sharepoint.com/:p:/r/sites/TechnicalSupport/Shared%20Documents/%E8%A8%AD%E7%BD%AE%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E6%A9%9F%E5%99%A8%E8%A8%AD%E7%BD%AE%E6%96%B9%E6%B3%95_Lite_LTE_%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%EF%BC%88%E4%BB%96%E7%A4%BE%E3%83%A6%E3%83%8B%E3%83%83%E3%83%88%EF%BC%89_KPV_v4.pptx",
-    "Tabuchi_3phase": "https://ergitsol.sharepoint.com/:p:/r/sites/TechnicalSupport/Shared%20Documents/%E8%A8%AD%E7%BD%AE%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E6%A9%9F%E5%99%A8%E8%A8%AD%E7%BD%AE%E6%96%B9%E6%B3%95_Lite_LTE_%E7%94%B0%E6%B7%B5%E9%9B%BB%E6%A9%9F%EF%BC%88%E4%B8%89%E7%9B%B8%EF%BC%89FG_v3.pptx",
-    "Tabuchi_1phase": "https://ergitsol.sharepoint.com/:p:/r/sites/TechnicalSupport/Shared%20Documents/%E8%A8%AD%E7%BD%AE%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E6%A9%9F%E5%99%A8%E8%A8%AD%E7%BD%AE%E6%96%B9%E6%B3%95_Lite_LTE_%E7%94%B0%E6%B7%B5%E9%9B%BB%E6%A9%9F%EF%BC%88%E5%83%85%E7%9B%B8%EF%BC%89_v3.pptx",
-    "Suntech": "https://ergitsol.sharepoint.com/:p:/r/sites/TechnicalSupport/Shared%20Documents/%E8%A8%AD%E7%BD%AE%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E6%A9%9F%E5%99%A8%E8%A8%AD%E7%BD%AE%E6%96%B9%E6%B3%95_Lite_LTE_%EF%BD%BB%EF%BE%9D%EF%BE%83%EF%BD%AF%EF%BD%B8_%EF%BE%8A%EF%BE%9F%EF%BE%85%EF%BD%BF%EF%BE%86%EF%BD%AF%EF%BD%B8_%EF%BE%98%EF%BD%B0%EF%BE%8C%EF%BE%9F%EF%BE%84%EF%BE%9D_%EF%BE%88%EF%BD%B8%EF%BD%BD%EF%BE%84%EF%BD%B4%EF%BE%85%EF%BD%BC%EF%BE%9E%EF%BD%B0.FG_v3.pptx",
-    "ABB": "https://ergitsol.sharepoint.com/:p:/r/sites/egypt/Shared%20Documents/Solar%20Monitor/%E5%87%BA%E8%8D%B7%E7%AE%A1%E7%90%86%E8%A1%A8/%E8%A8%AD%E7%BD%AE%E3% 2%A2%E3%83%BC%E3%83%A2%E3%83%8B%E6%A9%9F%E5%99%A8%E8%A8%AD%E7%BD%AE%E6%96%B9%E6%B3%95_Lite_LTE_ABB%EF%BC%88%E3%20%A4%E3%83%BC%E3%82%B5%E3%83%8D%E3%83%83%E3%83%88%EF%BC%89_%E3%83%97%E3%83%A1%E3%83%A2%E3%83%A1_BOX%E7%84%A1.pptx",
-    "IDEC": "https://ergitsol.sharepoint.com/:p:/r/sites/egypt/Shared%20Documents/Solar%20Monitor/%E5%87%BA%E8%8D%B7%E7%AE%A1%E7%90%86%E8%A1%A8/%E8%A8%AD%E7%BD%AE%E3% 2%A2%E3%83%BC%E3%83%A2%E3%83%8B%E6%A9%9F%E5%99%A8%E8%A8%AD%E7%BD%AE%E6%96%B9%E6%B3%95_Lite_LTE_IDEC_Pro_BOX%E6%9C%89.pptx",
-    "SolarEdge": "https://ergitsol.sharepoint.com/:p:/r/sites/egypt/Shared%20Documents/Solar%20Monitor/%E5%87%BA%E8%8D%B7%E7%AE%A1%E7%90%86%E8%A1%A8/%E8%A8%AD%E7%BD%AE%E3% 2%A2%E3%83%BC%E3%83%A2%E3%83%8B%E6%A9%9F%E5%99%A8%E8%A8%AD%E7%BD%AE%E6%96%B9%E6%B3%95_Lite_LTE_SolarEdge%EF%BC%88%E6%96%B0%E5%9E%8B%E7%95%AA%EF%BC%89_Lite_BOX%E6%9C%89.pptx",
-    "SUN GROW": "https://ergitsol.sharepoint.com/:p:/r/sites/egypt/Shared%20Documents/Solar%20Monitor/%E5%87%BA%E8%8D%B7%E7%AE%A1%E7%90%86%E8%A1%A8/%E8%A8%AD%E7%BD%AE%E3% 2%A2%E3%83%BC%E3%83%A2%E3%83%8B%E6%A9%9F%E5%99%A8%E8%A8%AD%E7%BD%AE%E6%96%B9%E6%B3%95_Lite_LTE_SUNGROW_Spread%E3%81%AE%E3%81%BF_SG49K5J.pptx",
-    "デルタ電子": "https://ergitsol.sharepoint.com/:p:/r/sites/egypt/Shared%20Documents/Solar%20Monitor/%E5%87%BA%E8%8D%B7%E7%AE%A1%E7%90%86%E8%A1%A8/%E8%A8%AD%E7%BD%AE%E3% 2%A2%E3%83%BC%E3%83%A2%E3%83%8B%E6%A9%9F%E5%99%A8%E8%A8%AD%E7%BD%AE%E6%96%B9%E6%B3%95_Lite_LTE_%E3%83%A1%E3%83%BC%E3%82%AB%E3%83%BC%E5%88%A5%EF%BC%89/%E3%83%87%E3%83%AB%E3%82%BF/%E3%83%87%E3%83%AB%E3%82%BF%EF%BC%88RPIM50J%EF%BC%89_LiteBOX.pptx",
-    "Diamond_elec": "https://ergitsol.sharepoint.com/:p:/r/sites/egypt/Shared%20Documents/Solar%20Monitor/%E5%87%BA%E8%8D%B7%E7%AE%A1%E7%90%86%E8%A1%A8/%E8%A8%AD%E7%BD%AE%E3% 2%A2%E3%83%BC%E3%83%A2%E3%83%8B%E6%A9%9F%E5%99%A8%E8%A8%AD%E7%BD%AE%E6%96%B9%E6%B3%95_Lite_LTE_%E3%83%A1%E3%83%BC%E3%82%AB%E3%83%BC%E5%88%A5%EF%BC%89/%E3%83%90%E3%83%BC%E3%83%AF%E3%83%BC%E3%82%AF/%E3%83%80%E3%82%A4%E3%83%A4%E3%83%A2%E3%83%B3%E3%83%85%E9%9B%BB%E6%B0%97/%E3%83%80%E3%82%A4%E3%83%A4%E3%83%A2%E3%83%B3%E3%83%85%E9%9B%BB%E6%B0%97_LiteBOX.pptx",
-    "安川電機": "https://ergitsol.sharepoint.com/:p:/r/sites/egypt/Shared%20Documents/Solar%20Monitor/%E5%87%BA%E8%8D%B7%E7%AE%A1%E7%90%86%E8%A1%A8/%E8%A8%AD%E7%BD%AE%E3% 2%A2%E3%83%BC%E3%83%A2%E3%83%8B%E6%A9%9F%E5%99%A8%E8%A8%AD%E7%BD%AE%E6%96%B9%E6%B3%95_Lite_LTE_%E5%AE%89%E5%B7%9D%E9%9B%BB%E6%A9%9F/%E5%AE%89%E5%B7%9D%E9%9B%BB%E6%A9%9F_Lite_BOX%E6%9C%89%EF%BC%88MJ%E6%9C%89%EF%BC%89.pptx",
-    "山洋電気": "https://ergitsol.sharepoint.com/:p:/r/sites/egypt/Shared%20Documents/Solar%20Monitor/%E5%87%BA%E8%8D%B7%E7%AE%A1%E7%90%86%E8%A1%A8/%E8%A8%AD%E7%BD%AE%E3% 2%A2%E3%83%BC%E3%83%A2%E3%83%8B%E6%A9%9F%E5%99%A8%E8%A8%AD%E7%BD%AE%E6%96%B9%E6%B3%95_Lite_LTE_%E5%B1%B1%E6%B4%8B%E9%9B%BB%E6%B0%97/%E5%B1%B1%E6%B4%8B%E9%9B%BB%E6%B0%97_LiteBOX.pptx"
+// ★新設：出力制御対応可能PCSのデータベース（ここにコピペされたデータを反映します！）
+const controlPcsData = {
+    "HUAWEI": [
+        { model: "SUN2000-4.95KTL-JPL0", status: "対応可能", note: "SmartLogger構成にて対応" },
+        { model: "SUN2000-50KTL-JPM1", status: "対応可能", note: "条件つき対応" }
+    ],
+    "デルタ電子": [
+        { model: "RPI M50J", status: "対応可能", note: "PPM Gateway接続必須" }
+    ],
+    "オムロン": [
+        { model: "KPVシリーズ", status: "対応可能", note: "出力制御ユニット必須" }
+    ],
+    "ダイヤゼブラ電機": [],
+    "安川電機": []
 };
 
-// ★圧縮格納データベース（カンマ区切りの全コードをJavaScriptエンジンが自動判別展開します）
+const manualUrls = {
+    "HUAWEI": "https://ergitsol.sharepoint.com/:p:/r/sites/TechnicalSupport/Shared%20Documents/%E8%A8%AD%E7%BD%AE%E3%83%9E%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E6%A9%9F%E5%99%A8%E8%A8%AD%E7%BD%AE%E6%96%B9%E6%B3%95_Lite_LTE_HUAWEI_FG%EF%BC%88VPN%EF%BC%89_v3.pptx?d=w7fe796cd80834579a20b27e3b4d81a01&csf=1&web=1&e=fGjsvW",
+    "HUAWEI_no_logger": "https://ergitsol.sharepoint.com/:p:/r/sites/TechnicalSupport/Shared%20Documents/%E8%A8%AD%E3%20%A2%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E6%A9%9F%E5%99%A8%E8%A8%AD%E7%BD%AE%E6%96%B9%E6%B3%95_Lite_LTE_HUAWEI4.95kW%E7%94%A8%20Smartlogger%E7%84%A1_V4.pptx?d=w20853c92c52147b6a24f1f5518222cb3&csf=1&web=1&e=jOlnYL",
+    "SMA_manager": "https://ergitsol.sharepoint.com/:p:/r/sites/TechnicalSupport/Shared%20Documents/%E8%A8%AD%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A4%E3%83%B3%E3%83%90%E3%83%BC%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%EF%BC%89_v4.pptx",
+    "SMA_cluster": "https://ergitsol.sharepoint.com/:p:/r/sites/TechnicalSupport/Shared%20Documents/%E8%A8%AD%E7%BD%AE%E3%20%A2%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%EF%BC%88%E3%20%AF%E3%83%A9%E3%20%A2%E3%82%B3%E3%83%B3%EF%BC%89_v3.pptx",
+    "SMA_control": "https://ergitsol.sharepoint.com/:p:/r/sites/TechnicalSupport/Shared%20Documents/%E8%A8%AD%E7%BD%AE%E3%20%A2%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%EF%BC%88%E5%87%BA%E5%8A%9B%E5%88%B6%E5%BE%A1%E3%81%AF%E3%82%8B%EF%BC%89_v3.pptx",
+    "SMA_fg": "https://ergitsol.sharepoint.com/:p:/r/sites/TechnicalSupport/Shared%20Documents/%E8%A8%AD%E7%BD%AE%E3%20%A2%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E6%A9%9F%E5%99%A8%E8%A8%AD%E7%BD%AE%E6%96%B9%E6%B3%95_Lite_LTE_SMA_Original_v3.pptx",
+    "Omron_fg": "https://ergitsol.sharepoint.com/:p:/r/sites/TechnicalSupport/Shared%20Documents/%E8%A8%AD%E7%BD%AE%E3%20%A2%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E6%A9%9F%E5%99%A8%E8%A8%AD%E7%BD%AE%E6%96%B9%E6%B3%95_Lite_LTE_%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%EF%BC%88KPV%EF%BC%89%E5%87%BA%E5%8A%9B%E5%88%B6%E5%BE%A1%E3%81%B5%E3%81%94_FG_v2.pptx",
+    "Omron_other_unit": "https://ergitsol.sharepoint.com/:p:/r/sites/TechnicalSupport/Shared%20Documents/%E8%A8%AD%E7%BD%AE%E3%20%A2%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E6%A9%9F%E5%99%A8%E8%A8%AD%E7%BD%AE%E6%96%B9%E6%B3%95_Lite_LTE_%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%EF%BC%88%E4%BB%96%E7%A4%BE%E3%83%A6%E3%83%8B%E3%83%83%E3%83%88%EF%BC%89_KPV_v4.pptx",
+    "Tabuchi_3phase": "https://ergitsol.sharepoint.com/:p:/r/sites/TechnicalSupport/Shared%20Documents/%E8%A8%AD%E7%BD%AE%E3%20%A2%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E6%A9%9F%E5%99%A8%E8%A8%AD%E7%BD%AE%E6%96%B9%E6%B3%95_Lite_LTE_%E7%94%B0%E6%B7%B5%E9%9B%BB%E6%A9%9F%EF%BC%88%E4%B8%89%E7%9B%B8%EF%BC%89FG_v3.pptx",
+    "Tabuchi_1phase": "https://ergitsol.sharepoint.com/:p:/r/sites/TechnicalSupport/Shared%20Documents/%E8%A8%AD%E7%BD%AE%E3%20%A2%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E6%A9%9F%E5%99%A8%E8%A8%AD%E7%BD%AE%E6%96%B9%E6%B3%95_Lite_LTE_%E7%94%B0%E6%B7%B5%E9%9B%BB%E6%A9%9F%EF%BC%88%E5%83%85%E7%9B%B8%EF%BC%89_v3.pptx",
+    "Suntech": "https://ergitsol.sharepoint.com/:p:/r/sites/TechnicalSupport/Shared%20Documents/%E8%A8%AD%E7%BD%AE%E3%20%A2%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E6%A9%9F%E5%99%A8%E8%A8%AD%E7%BD%AE%E6%96%B9%E6%B3%95_Lite_LTE_%EF%BD%BB%EF%BE%9D%EF%BE%83%EF%BD%AF%EF%BD%B8_%EF%BE%8A%EF%BE%9F%EF%BE%85%EF%BD%BF%EF%BE%86%EF%BD%AF%EF%BD%B8_%EF%BE%98%EF%BD%B0%EF%BE%8C%EF%BE%9F%EF%BE%84%EF%BE%9D_%EF%BE%88%EF%BD%B8%EF%BD%BD%EF%BE%84%EF%BD%B4%EF%BE%85%EF%BD%BC%EF%BE%9E%EF%BD%B0.FG_v3.pptx",
+    "ABB": "https://ergitsol.sharepoint.com/:p:/r/sites/egypt/Shared%20Documents/Solar%20Monitor/%E5%87%BA%E8%8D%B7%E7%AE%A1%E7%90%86%E8%A1%A8/%E8%A8%AD%E7%BD%AE%E3%20%20%A2%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E6%A9%9F%E5%99%A8%E8%A8%AD%E7%BD%AE%E6%96%B9%E6%B3%95_Lite_LTE_ABB%EF%BC%88%E3%20%20%A4%E3%83%BC%E3%82%B5%E3%83%8D%E3%83%83%E3%83%88%EF%BC%89_%E3%83%97%E3%83%A1%E3%83%A2%E3%83%A1_BOX%E7%84%A1.pptx",
+    "IDEC": "https://ergitsol.sharepoint.com/:p:/r/sites/egypt/Shared%20Documents/Solar%20Monitor/%E5%87%BA%E8%8D%B7%E7%AE%A1%E7%90%86%E8%A1%A8/%E8%A8%AD%E7%BD%AE%E3%20%20%A2%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E6%A9%9F%E5%99%A8%E8%A8%AD%E7%BD%AE%E6%96%B9%E6%B3%95_Lite_LTE_IDEC_Pro_BOX%E6%9C%89.pptx",
+    "SolarEdge": "https://ergitsol.sharepoint.com/:p:/r/sites/egypt/Shared%20Documents/Solar%20Monitor/%E5%87%BA%E8%8D%B7%E7%AE%A1%E7%90%86%E8%A1%A8/%E8%A8%AD%E7%BD%AE%E3%20%20%A2%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E6%A9%9F%E5%99%A8%E8%A8%AD%E7%BD%AE%E6%96%B9%E6%B3%95_Lite_LTE_SolarEdge%EF%BC%88%E6%96%B0%E5%1E%8B%E7%95%AA%EF%BC%89_Lite_BOX%E6%9C%89.pptx",
+    "SUN GROW": "https://ergitsol.sharepoint.com/:p:/r/sites/egypt/Shared%20Documents/Solar%20Monitor/%E5%87%BA%E8%8D%B7%E7%AE%A1%E7%90%86%E8%A1%A8/%E8%A8%AD%E7%BD%AE%E3%20%20%A2%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E6%A9%9F%E5%99%A8%E8%A8%AD%E7%BD%AE%E6%96%B9%E6%B3%95_Lite_LTE_SUNGROW_Spread%E3%81%AE%E3%81%BF_SG49K5J.pptx",
+    "デルタ電子": "https://ergitsol.sharepoint.com/:p:/r/sites/egypt/Shared%20Documents/Solar%20Monitor/%E5%87%BA%E8%8D%B7%E7%AE%A1%E7%90%86%E8%A1%A8/%E8%A8%AD%E7%BD%AE%E3%20%20%A2%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E6%A9%9F%E5%99%A8%E8%A8%AD%E7%BD%AE%E6%96%B9%E6%B3%95_Lite_LTE_%E3%83%A1%E3%83%BC%E3%20%A2%E3%83%BC%E5%88%A5%EF%BC%89/%E3%83%87%E3%83%AB%E3%20%A2/%E3%83%87%E3%83%AB%E3%20%A2%EF%BC%88RPIM50J%EF%BC%89_LiteBOX.pptx",
+    "Diamond_elec": "https://ergitsol.sharepoint.com/:p:/r/sites/egypt/Shared%20Documents/Solar%20Monitor/%E5%87%BA%E8%8D%B7%E7%AE%A1%E7%90%86%E8%A1%A8/%E8%A8%AD%E7%BD%AE%E3%20%20%A2%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E6%A9%9F%E5%99%A8%E8%A8%AD%E7%BD%AE%E6%96%B9%E6%B3%95_Lite_LTE_%E3%83%A1%E3%83%BC%E3%20%A2%E3%83%BC%E5%88%A5%EF%BC%89/%E3%83%90%E3%20%A2%E3%83%AF%E3%20%A2%E3%20%A2/%E3%83%80%E3%20%A2%E3%83%A4%E3%20%A2%E3%20%A2%E3%83%B3%E3%20%A2%E9%9B%BB%E6%B0%97/%E3%83%80%E3%20%A2%E3%20%A2%E3%83%A4%E3%20%A2%E3%20%A2%E3%83%B3%E3%20%A2%E9%9B%BB%E6%B0%97_LiteBOX.pptx",
+    "安川電機": "https://ergitsol.sharepoint.com/:p:/r/sites/egypt/Shared%20Documents/Solar%20Monitor/%E5%87%BA%E8%8D%B7%E7%AE%A1%E7%90%86%E8%A1%A8/%E8%A8%AD%E7%BD%AE%E3%20%20%A2%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E6%A9%9F%E5%99%A8%E8%A8%AD%E7%BD%AE%E6%96%B9%E6%B3%95_Lite_LTE_%E5%AE%89%E5%B7%1D%E9%9B%BB%E6%A9%9F/%E5%AE%89%E5%B7%1D%E9%9B%BB%E6%A9%9F_Lite_BOX%E6%9C%89%EF%BC%88MJ%E6%9C%89%EF%BC%89.pptx",
+    "山洋電気": "https://ergitsol.sharepoint.com/:p:/r/sites/egypt/Shared%20Documents/Solar%20Monitor/%E5%87%BA%E8%8D%B7%E7%AE%A1%E7%90%86%E8%A1%A8/%E8%A8%AD%E7%BD%AE%E3%20%20%A2%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E6%A9%9F%E5%99%A8%E8%A8%AD%E7%BD%AE%E6%96%B9%E6%B3%95_Lite_LTE_%E5%B1%B1%E6%B4%1B%E9%9B%BB%E6%B0%97/%E5%B1%B1%E6%B4%1B%E9%9B%BB%E6%B0%97_LiteBOX.pptx"
+};
+
 const masterAlarms = {
     "HUAWEI": {
         "2001": { name: "2001 ストリング電圧高", title: "【HUAWEI】PV構成の確認", text: "PVストリングの直列接続構成（直列数）を確認してください。" },
@@ -143,7 +160,7 @@ const masterAlarms = {
         "gf23": { name: "GF23 内部通信異常(1)", title: "【デルタ】内部通信異常(1)", text: "【原因】内部通信エラー。【対処】AC/DCスイッチ入れ直し、メーカーへ連絡。" },
         "gf24": { name: "GF24 直流地絡の異常", title: "【デルタ】直流地絡の異常", text: "【原因】DC側の漏電・地絡。【対処】入力ストリングの絶縁を測定、漏電箇所特定。" },
         "gf26": { name: "GF26 内部電源異常", title: "【デルタ】内部電源異常", text: "【原因】内部電源回路の故障。【対処】配線状態点検、AC/DC再投入、メーカーへ。" },
-        "gf27": { name: "GF27 直流地絡検出回路異常", title: "【デルタ】地絡検出回路故障", text: "【原因】地絡検出センサー異常。【対処】再起動、改善しない場合はメーカー。" },
+        "gf27": { name: "GF27 直流地絡検出回路異常", title: "【デルタ】地絡検出回路故障", text: "【原因}地絡検出センサー異常。【対処】再起動、改善しない場合はメーカー。" },
         "gf28": { name: "GF28 リレー溶着検出", title: "【デルタ】出力リレー溶着検出", text: "【原因】ACリレーの溶着故障。【対処】配線・系統確認。直らない場合はメーカーへ。" },
         "gf29": { name: "GF29 リレー接続不可", title: "【デルタ】出力リレー動作不良", text: "【原因】リレーが正常接続できない。【対処】配線確認、AC/DC再投入。メーカー連絡。" },
         "gf30": { name: "GF30 入力接続不良", title: "【デルタ】入力配線・接続不良", text: "【原因】DC接続不良、PV絶縁低下。【対処】DCコネクタ確認、太陽電池の絶縁チェック。" },
@@ -249,7 +266,66 @@ const masterAlarms = {
 };
 
 let selectedRootType = ""; let selectedTarget = ""; let selectedMaker = "";
-function selectRoot(stepNum, type) { highlightButton(type === 'triage' ? "⚠️ 障害の切り分け (PCS/監視機器)" : "📦 新規の機器手配 (マニュアル構成)"); clearSubsequentSteps(stepNum); selectedRootType = type; if (type === 'triage') { renderTriageStart(stepNum + 1); } else { renderOrderMakerSelection(stepNum + 1); } }
+
+// ★selectRoot関数を3分岐対応に修正
+function selectRoot(stepNum, type) { 
+    let btnText = "";
+    if (type === 'triage') btnText = "⚠️ 障害の切り分け (PCS/監視機器)";
+    else if (type === 'order') btnText = "📦 新規の機器手配 (マニュアル構成)";
+    else if (type === 'control') btnText = "📡 出力制御対応可能PCS";
+    
+    highlightButton(btnText); 
+    clearSubsequentSteps(stepNum); 
+    selectedRootType = type; 
+    
+    if (type === 'triage') { 
+        renderTriageStart(stepNum + 1); 
+    } else if (type === 'order') { 
+        renderOrderMakerSelection(stepNum + 1); 
+    } else if (type === 'control') {
+        renderControlMakerSelection(stepNum + 1); // 出力制御フローの開始
+    }
+}
+
+// ★新設：出力制御対応可能PCS用のメーカー選択画面
+function renderControlMakerSelection(stepNum) {
+    const node = document.createElement('div');
+    node.className = 'node';
+    let buttonsHtml = '<div class="grid-buttons">';
+    manufacturers.forEach(maker => {
+        buttonsHtml += `<button onclick="selectControlMaker(${stepNum}, '${maker}')">${maker}</button>`;
+    });
+    buttonsHtml += '</div>';
+    node.innerHTML = `<div class="label">出力制御: STEP 1</div><div class="question">確認したいPCSのメーカーを選択してください。</div>${buttonsHtml}`;
+    appendNode(node);
+}
+
+// ★新設：選択したメーカーの対応状況と、SharePointへの参考リンクを表示
+function selectControlMaker(stepNum, maker) {
+    highlightButton(maker);
+    clearSubsequentSteps(stepNum);
+    const node = document.createElement('div');
+    node.className = 'node';
+    
+    let title = `【${maker}】出力制御対応可能PCS`;
+    let content = "";
+    
+    const pcsList = controlPcsData[maker] || [];
+    if (pcsList.length > 0) {
+        content += `<p style="color:var(--success-color); font-weight:bold;">📋 ツール内登録済みの対応型式一覧：</p><ul class="order-list">`;
+        pcsList.forEach(pcs => {
+            content += `<li>🔳 <strong>${pcs.model}</strong> （${pcs.status} / 備考: ${pcs.note}）</li>`;
+        });
+        content += `</ul>`;
+    } else {
+        content += `<p style="color:var(--warning-color); font-weight:bold;">💡 現在、詳細データを流し込み準備中です。</p><p>お手数ですが、最新の情報は下記リンクのExcel一覧表から直接ご確認ください。</p>`;
+    }
+    
+    node.innerHTML = `<div class="label">CONTROL PCS</div><div class="result-box" style="border-left: 4px solid var(--success-color); background-color: rgba(46, 164, 79, 0.1);"><div class="result-title">${title}</div>${content}</div><div class="doc-reference"><p><strong>元資料（SharePoint）:</strong> <a href="https://ergitsol.sharepoint.com/:x:/s/TechnicalSupport/IQB4WUXzD4NIQpFNcWJE7F4mAUCR1B4y1moI_feh7gJelx8?e=rOvE3t" target="_blank" style="background-color:var(--success-color); color:white; padding:6px 12px; border-radius:4px; text-decoration:none;">🔗 エクセル一覧表を開く</a></p></div>`;
+    appendNode(node);
+    document.getElementById('reset-btn').style.display = 'block';
+}
+
 function renderOrderMakerSelection(stepNum) { const node = document.createElement('div'); node.className = 'node'; let buttonsHtml = '<div class="grid-buttons">'; orderMakers.forEach(maker => { let displayHtml = maker; if (maker.includes("※Webコネクト必須")) { displayHtml = maker.replace("※Webコネクト必須", '<span style="color: var(--alert-color); font-weight: bold;">※Webコネクト必須</span>'); } buttonsHtml += `<button onclick="selectOrderMaker(${stepNum}, '${maker}')">${displayHtml}</button>`; }); buttonsHtml += '</div>'; node.innerHTML = `<div class="label">機器手配: STEP 1</div><div class="question">手配メーカーを選択。</div>${buttonsHtml}`; appendNode(node); }
 function selectOrderMaker(stepNum, maker) { highlightButton(maker); clearSubsequentSteps(stepNum); if (maker === "HUAWEI" || maker === "HUAWEI（スマートロガーあり）") { renderHuaweiSpecSelection(stepNum, maker); } else if (maker.includes("SMA")) { renderSmaSpecSelection(stepNum, maker); } else if (maker === "オムロン") { renderOmronSpecSelection(stepNum, maker); } else if (maker === "田淵電機(ダイヤゼブラ電機)") { renderTabuchiSpecSelection(stepNum, maker); } else { let key = maker; if (maker === "ダイヤモンド電機") key = "Diamond_elec"; if (maker === "サンテックパワー") key = "Suntech"; openManualAndRenderResult(stepNum, maker, key); } }
 function renderHuaweiSpecSelection(stepNum, maker) { const node = document.createElement('div'); node.className = 'node'; node.innerHTML = `<div class="label">${maker}: 仕様</div><div class="question">システム構成を選択。</div><div class="btn-group"><button onclick="openManualAndRenderResult(${stepNum + 1}, '${maker} (VPN)', 'HUAWEI')">① HUAWEI FG(VPN)</button><button onclick="openManualAndRenderResult(${stepNum + 1}, '${maker} (ロガー無)', 'HUAWEI_no_logger')">② Smartlogger無</button></div>`; appendNode(node); }
@@ -264,14 +340,7 @@ function selectPingStatus(stepNum, status) { highlightButton(status === 'OK' ? "
 function renderPcsCommCheck(stepNum) { const node = document.createElement('div'); node.className = 'node'; node.innerHTML = `<div class="label">監視機器: STEP 2</div><div class="question">PCS（パワコン）との通信データは取れていますか？</div><div class="btn-group"><button onclick="selectPcsCommStatus(${stepNum}, 'data_ok')">データが取れている</button><button onclick="selectPcsCommStatus(${stepNum}, 'data_ng')">通信不通（データなし）</button></div>`; appendNode(node); }
 function selectPcsCommStatus(stepNum, status) { highlightButton(status === 'data_ok' ? "データが取れている" : "通信不通（データなし）"); clearSubsequentSteps(stepNum); if (status === 'data_ok') { renderPcsRunningCheck(stepNum + 1); } else { renderSendCmdCheck(stepNum + 1); } }
 function renderPcsRunningCheck(stepNum) { const node = document.createElement('div'); node.className = 'node'; node.innerHTML = `<div class="label">監視機器: STEP 3</div><div class="question">取得データから見たPCSの状態。</div><div class="btn-group"><button onclick="goToPcsFlow(${stepNum})">① PCS稼働（アラート精査へ）</button><button onclick="selectNoAlertRoute(${stepNum}, 'stop')">② PCS停止（発電量0）</button></div>`; appendNode(node); }
-
-// ★ジャービス修正ポイント：STEP3の文言変更（実施し、結果は〜）＆2択の分岐アクション★
-function renderSendCmdCheck(stepNum) {
-    const node = document.createElement('div'); node.className = 'node';
-    node.innerHTML = `<div class="label">監視機器: STEP 3</div><div class="question">状況確認のため、対象PCSに「cmd（コマンド送信）」を実施し、結果はどうですか？</div><div class="btn-group"><button onclick="renderResult(${stepNum + 1}, '【判断】有識者への確認（戻り値の確認）', 'コマンド応答（戻り値）あり。内容を控え、仕様がわかる有識者・担当者へ確認してください。')">cmd応答あり</button><button onclick="renderResult(${stepNum + 1}, '【判断】現地確認（駆け付け）の手配', 'コマンド応答なし。フリーズや結線異常の可能性があるため、現地機器確認（再起動・配線点検等）の手配をしてください。')">cmd応答なし</button></div>`;
-    appendNode(node);
-}
-
+function renderSendCmdCheck(stepNum) { const node = document.createElement('div'); node.className = 'node'; node.innerHTML = `<div class="label">監視機器: STEP 3</div><div class="question">状況確認のため、対象PCSに「cmd（コマンド送信）」を実施し、結果はどうですか？</div><div class="btn-group"><button onclick="renderResult(${stepNum + 1}, '【判断】有識者への確認（戻り値の確認）', 'コマンド応答（戻り値）あり。内容を控え、仕様がわかる有識者・担当者へ確認してください。')">cmd応答あり</button><button onclick="renderResult(${stepNum + 1}, '【判断】現地確認（駆け付け）の手配', 'コマンド応答なし。フリーズや結線異常の可能性があるため、現地機器確認（再起動・配線点検等）の手配をしてください。')">cmd応答なし</button></div>`; appendNode(node); }
 function goToPcsFlow(stepNum) { clearSubsequentSteps(stepNum); renderMakerSelection(stepNum + 1); }
 function renderMakerSelection(stepNum) { const node = document.createElement('div'); node.className = 'node'; let buttonsHtml = '<div class="grid-buttons">'; manufacturers.forEach(maker => { buttonsHtml += `<button onclick="selectMaker(${stepNum}, '${maker}')">${maker}</button>`; }); buttonsHtml += '</div>'; node.innerHTML = `<div class="label">PCS選択</div><div class="question">対象メーカーを選択。</div>${buttonsHtml}`; appendNode(node); }
 function selectMaker(stepNum, maker) { highlightButton(maker); clearSubsequentSteps(stepNum); selectedMaker = maker; if (maker === "HUAWEI") { renderSmartLoggerCheck(stepNum + 1); } else { renderAlertCheck(stepNum + 1); } }
@@ -284,26 +353,7 @@ function selectAlertStatus(stepNum, status) { highlightButton(status === 'yes' ?
 function renderNoAlertStatusCheck(stepNum) { const node = document.createElement('div'); node.className = 'node'; node.innerHTML = `<div class="label">状態切り分け</div><div class="question">詳しい状態を選択。</div><div class="btn-group"><button onclick="selectNoAlertRoute(${stepNum}, 'stop')">PCS停止（発電量0）</button><button onclick="selectNoAlertRoute(${stepNum}, 'comm_fail')">通信不通（オフライン）</button></div>`; appendNode(node); }
 function selectNoAlertRoute(stepNum, routeType) { highlightButton(routeType === 'stop' ? "PCS停止（発電量0）" : "通信不通（オフライン）"); clearSubsequentSteps(stepNum); if (routeType === 'stop') { renderResult(stepNum + 1, "【判断】現地確認が必要です", "遮断器トリップや基板故障の疑い。現地にて現場盤・外観点検を行ってください。"); } else { renderResult(stepNum + 1, "【アクション】PCSへcmd送信実施", "通信途絶。対象PCSへ応答確認/再接続指示のcmdを送信し復旧確認。"); } }
 function renderSmartSearch(stepNum) { const node = document.createElement('div'); node.className = 'node'; node.innerHTML = `<div class="label">マニュアル検索</div><div class="question">エラーコードやキーワードを入力。</div><input type="text" class="search-box" id="alarm-search-input" placeholder="検索..." oninput="filterAlarms(${stepNum})"><div class="search-results" id="search-results-list"></div>`; appendNode(node); filterAlarms(stepNum); }
-
-// ★大改造検索ロジック：カンマ区切りのグループキー（例: ge11,ge13...）を展開して個別コードヒットを保証します
-function filterAlarms(stepNum) {
-    const input = document.getElementById('alarm-search-input').value.toLowerCase().trim();
-    const resultsContainer = document.getElementById('search-results-list'); resultsContainer.innerHTML = '';
-    const companyAlarms = masterAlarms[selectedMaker]; let matchCount = 0;
-    if (companyAlarms) {
-        for (let groupKey in companyAlarms) {
-            const alarm = companyAlarms[groupKey]; const keys = groupKey.split(',');
-            let isKeyMatch = keys.some(k => k.trim().toLowerCase().includes(input));
-            if (input === '' || isKeyMatch || alarm.name.toLowerCase().includes(input) || alarm.text.toLowerCase().includes(input)) {
-                matchCount++; const item = document.createElement('div'); item.className = 'search-item';
-                item.innerText = alarm.name; item.onclick = function() { selectAlarm(stepNum, groupKey); };
-                resultsContainer.appendChild(item);
-            }
-        }
-    }
-    if (matchCount === 0) { resultsContainer.innerHTML = `<div class="no-result">該当データが見つかりません。</div>`; }
-}
-
+function filterAlarms(stepNum) { const input = document.getElementById('alarm-search-input').value.toLowerCase().trim(); const resultsContainer = document.getElementById('search-results-list'); resultsContainer.innerHTML = ''; const companyAlarms = masterAlarms[selectedMaker]; let matchCount = 0; if (companyAlarms) { for (let groupKey in companyAlarms) { const alarm = companyAlarms[groupKey]; const keys = groupKey.split(','); let isKeyMatch = keys.some(k => k.trim().toLowerCase().includes(input)); if (input === '' || isKeyMatch || alarm.name.toLowerCase().includes(input) || alarm.text.toLowerCase().includes(input)) { matchCount++; const item = document.createElement('div'); item.className = 'search-item'; item.innerText = alarm.name; item.onclick = function() { selectAlarm(stepNum, groupKey); }; resultsContainer.appendChild(item); } } } if (matchCount === 0) { resultsContainer.innerHTML = `<div class="no-result">該当データが見つかりません。</div>`; } }
 function selectAlarm(currentStepNum, code) { clearSubsequentSteps(currentStepNum); const alarm = masterAlarms[selectedMaker][code]; document.getElementById('alarm-search-input').value = alarm.name; const node = document.createElement('div'); node.className = 'node'; node.innerHTML = `<div class="label" style="color:var(--success-color);">${selectedMaker} DIAGNOSIS</div><div class="result-box"><div class="result-title">${alarm.title}</div><p style="margin:5px 0 0; line-height:1.6; white-space:pre-wrap;">${alarm.text}</p></div>`; appendNode(node); document.getElementById('reset-btn').style.display = 'block'; }
 function appendNode(node) { document.getElementById('flow-container').appendChild(node); window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }); }
 function renderResult(stepNum, title, text) { const node = document.createElement('div'); node.className = 'node'; node.innerHTML = `<div class="label" style="color:var(--success-color);">DIAGNOSIS COMPLETE</div><div class="result-box"><div class="result-title">${title}</div><p style="margin:5px 0 0; line-height:1.5; white-space:pre-wrap;">${text}</p></div>`; appendNode(node); document.getElementById('reset-btn').style.display = 'block'; }
