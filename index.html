@@ -50,19 +50,18 @@
             <div class="btn-group">
                 <button onclick="selectRoot(1, 'triage')" style="border-color: var(--warning-color); color: var(--warning-color);">⚠️ 障害の切り分け (PCS/監視機器)</button>
                 <button onclick="selectRoot(1, 'order')" style="border-color: var(--accent-color); color: var(--accent-color);">📦 新規の機器手配 (マニュアル構成)</button>
-                <!-- ★新設：出力制御対応可能PCSボタン -->
                 <button onclick="selectRoot(1, 'control')" style="border-color: var(--success-color); color: var(--success-color);">📡 出力制御対応可能PCS</button>
             </div>
         </div>
     </div>
-    <button class="reset-btn" onclick="resetFlow()" style="display:none;" id="reset-btn">最初からやり難す</button>
+    <button class="reset-btn" onclick="resetFlow()" style="display:none;" id="reset-btn">最初からやり直す</button>
 </div>
 
 <script>
 const manufacturers = ["HUAWEI", "デルタ電子", "オムロン", "ダイヤゼブラ電機", "安川電機"];
 const orderMakers = ["ABB", "HUAWEI", "IDEC", "JAソーラー", "SMA ※Webコネクト必須", "SolarEdge", "SUN GROW", "エクソル", "オムロン", "カナディアン", "サニックス", "サンテックパワー", "シャープ", "ソーラーフロンティア", "ダイヘン", "ダイヤモンド電機", "デルタ電子", "パナソニック", "安川電機", "山洋電気", "新電元工業", "田淵電機(ダイヤゼブラ電機)"];
 
-// ★新設：出力制御対応可能PCSのデータベース（ここにコピペされたデータを反映します！）
+// 📥 ここにExcelからコピペしたデータを流し込みます！
 const controlPcsData = {
     "HUAWEI": [
         { model: "SUN2000-4.95KTL-JPL0", status: "対応可能", note: "SmartLogger構成にて対応" },
@@ -79,17 +78,17 @@ const controlPcsData = {
 };
 
 const manualUrls = {
-    "HUAWEI": "https://ergitsol.sharepoint.com/:p:/r/sites/TechnicalSupport/Shared%20Documents/%E8%A8%AD%E7%BD%AE%E3%83%9E%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E6%A9%9F%E5%99%A8%E8%A8%AD%E7%BD%AE%E6%96%B9%E6%B3%95_Lite_LTE_HUAWEI_FG%EF%BC%88VPN%EF%BC%89_v3.pptx?d=w7fe796cd80834579a20b27e3b4d81a01&csf=1&web=1&e=fGjsvW",
+    "HUAWEI": "https://ergitsol.sharepoint.com/:p:/r/sites/TechnicalSupport/Shared%20Documents/%E8%A8%AD%E7%BD%AE%E3%83%9E%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E6%A9%9F%E5%99%A8%E8%A8%AD%E7%BD%AE%E6%96%B9%E6%B3%95_Lite_LTE_HUAWEI_FG%EF%BC%88VPN%EF%BC%89_v3.pptx?d=w7fe796cd80834579a20b27e3b4d81a01&csf=1&web=1&e=fGjsvW",
     "HUAWEI_no_logger": "https://ergitsol.sharepoint.com/:p:/r/sites/TechnicalSupport/Shared%20Documents/%E8%A8%AD%E3%20%A2%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E6%A9%9F%E5%99%A8%E8%A8%AD%E7%BD%AE%E6%96%B9%E6%B3%95_Lite_LTE_HUAWEI4.95kW%E7%94%A8%20Smartlogger%E7%84%A1_V4.pptx?d=w20853c92c52147b6a24f1f5518222cb3&csf=1&web=1&e=jOlnYL",
-    "SMA_manager": "https://ergitsol.sharepoint.com/:p:/r/sites/TechnicalSupport/Shared%20Documents/%E8%A8%AD%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A4%E3%83%B3%E3%83%90%E3%83%BC%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%EF%BC%89_v4.pptx",
-    "SMA_cluster": "https://ergitsol.sharepoint.com/:p:/r/sites/TechnicalSupport/Shared%20Documents/%E8%A8%AD%E7%BD%AE%E3%20%A2%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%EF%BC%88%E3%20%AF%E3%83%A9%E3%20%A2%E3%82%B3%E3%83%B3%EF%BC%89_v3.pptx",
-    "SMA_control": "https://ergitsol.sharepoint.com/:p:/r/sites/TechnicalSupport/Shared%20Documents/%E8%A8%AD%E7%BD%AE%E3%20%A2%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%EF%BC%88%E5%87%BA%E5%8A%9B%E5%88%B6%E5%BE%A1%E3%81%AF%E3%82%8B%EF%BC%89_v3.pptx",
-    "SMA_fg": "https://ergitsol.sharepoint.com/:p:/r/sites/TechnicalSupport/Shared%20Documents/%E8%A8%AD%E7%BD%AE%E3%20%A2%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E6%A9%9F%E5%99%A8%E8%A8%AD%E7%BD%AE%E6%96%B9%E6%B3%95_Lite_LTE_SMA_Original_v3.pptx",
-    "Omron_fg": "https://ergitsol.sharepoint.com/:p:/r/sites/TechnicalSupport/Shared%20Documents/%E8%A8%AD%E7%BD%AE%E3%20%A2%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E6%A9%9F%E5%99%A8%E8%A8%AD%E7%BD%AE%E6%96%B9%E6%B3%95_Lite_LTE_%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%EF%BC%88KPV%EF%BC%89%E5%87%BA%E5%8A%9B%E5%88%B6%E5%BE%A1%E3%81%B5%E3%81%94_FG_v2.pptx",
-    "Omron_other_unit": "https://ergitsol.sharepoint.com/:p:/r/sites/TechnicalSupport/Shared%20Documents/%E8%A8%AD%E7%BD%AE%E3%20%A2%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E6%A9%9F%E5%99%A8%E8%A8%AD%E7%BD%AE%E6%96%B9%E6%B3%95_Lite_LTE_%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%EF%BC%88%E4%BB%96%E7%A4%BE%E3%83%A6%E3%83%8B%E3%83%83%E3%83%88%EF%BC%89_KPV_v4.pptx",
-    "Tabuchi_3phase": "https://ergitsol.sharepoint.com/:p:/r/sites/TechnicalSupport/Shared%20Documents/%E8%A8%AD%E7%BD%AE%E3%20%A2%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E6%A9%9F%E5%99%A8%E8%A8%AD%E7%BD%AE%E6%96%B9%E6%B3%95_Lite_LTE_%E7%94%B0%E6%B7%B5%E9%9B%BB%E6%A9%9F%EF%BC%88%E4%B8%89%E7%9B%B8%EF%BC%89FG_v3.pptx",
-    "Tabuchi_1phase": "https://ergitsol.sharepoint.com/:p:/r/sites/TechnicalSupport/Shared%20Documents/%E8%A8%AD%E7%BD%AE%E3%20%A2%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E6%A9%9F%E5%99%A8%E8%A8%AD%E7%BD%AE%E6%96%B9%E6%B3%95_Lite_LTE_%E7%94%B0%E6%B7%B5%E9%9B%BB%E6%A9%9F%EF%BC%88%E5%83%85%E7%9B%B8%EF%BC%89_v3.pptx",
-    "Suntech": "https://ergitsol.sharepoint.com/:p:/r/sites/TechnicalSupport/Shared%20Documents/%E8%A8%AD%E7%BD%AE%E3%20%A2%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E6%A9%9F%E5%99%A8%E8%A8%AD%E7%BD%AE%E6%96%B9%E6%B3%95_Lite_LTE_%EF%BD%BB%EF%BE%9D%EF%BE%83%EF%BD%AF%EF%BD%B8_%EF%BE%8A%EF%BE%9F%EF%BE%85%EF%BD%BF%EF%BE%86%EF%BD%AF%EF%BD%B8_%EF%BE%98%EF%BD%B0%EF%BE%8C%EF%BE%9F%EF%BE%84%EF%BE%9D_%EF%BE%88%EF%BD%B8%EF%BD%BD%EF%BE%84%EF%BD%B4%EF%BE%85%EF%BD%BC%EF%BE%9E%EF%BD%B0.FG_v3.pptx",
+    "SMA_manager": "https://ergitsol.sharepoint.com/:p:/r/sites/TechnicalSupport/Shared%20Documents/%E8%A8%AD%E3%20%A2%E3%20%A2%E3%83%BC%E3%20%A2%E3%83%BC%E3%20%A2%E3%83%BC%E3%20%A2%E3%83%BC%E3%20%A2%E3%83%BC%E3%20%A2%E3%83%BC%E3%20%A2%E3%83%BC%E3%20%A2%E3%83%BC%E3%20%A2%E3%83%BC%E3%20%A2%E3%83%BC%E3%20%A2%E3%20%A2%E3%20%A2%E3%20%A2%E3%20%A2%E3%20%A2%E3%20%A2%E3%20%A2%EF%BC%89_v4.pptx",
+    "SMA_cluster": "https://ergitsol.sharepoint.com/:p:/r/sites/TechnicalSupport/Shared%20Documents/%E8%A8%AD%E3%20%A2%E3%20%A2%E3%83%BC%E3%20%A2%EF%BC%88%E3%20%AF%E3%20%A2%E3%20%A2%EF%BC%89_v3.pptx",
+    "SMA_control": "https://ergitsol.sharepoint.com/:p:/r/sites/TechnicalSupport/Shared%20Documents/%E8%A8%AD%E3%20%A2%E3%20%A2%E3%83%BC%E3%20%A2%EF%BC%88%E5%87%BA%E5%8A%9B%E5%88%B6%E5%BE%A1%E3%81%AF%E3%82%8B%EF%BC%89_v3.pptx",
+    "SMA_fg": "https://ergitsol.sharepoint.com/:p:/r/sites/TechnicalSupport/Shared%20Documents/%E8%A8%AD%E3%20%A2%E3%20%A2%E3%83%BC%E3%20%A2%E6%A9%9F%E5%99%A8%E8%A8%AD%E7%BD%AE%E6%96%B9%E6%B3%95_Lite_LTE_SMA_Original_v3.pptx",
+    "Omron_fg": "https://ergitsol.sharepoint.com/:p:/r/sites/TechnicalSupport/Shared%20Documents/%E8%A8%AD%E3%20%A2%E3%20%A2%E3%83%BC%E3%20%A2%E6%A9%9F%E5%99%A8%E8%A8%AD%E7%BD%AE%E6%96%B9%E6%B3%95_Lite_LTE_%E3%20%A2%E3%20%A2%E3%20%A2%E3%20%A2%E3%20%A2%E3% 2%A2%E3% 2%A2%E3% 2%A2%EF%BC%88KPV%EF%BC%89%E5%87%BA%E5%8A%9B%E5%88%B6%E5%BE%A1%E3%81%B5%E3%81%94_FG_v2.pptx",
+    "Omron_other_unit": "https://ergitsol.sharepoint.com/:p:/r/sites/TechnicalSupport/Shared%20Documents/%E8%A8%AD%E3%20%A2%E3%20%A2%E3%20%A2%E6%A9%9F%E5%99%A8%E8%A8%AD%E7%BD%AE%E6%96%B9%E6%B3%95_Lite_LTE_%E3%20%A2%E3%20%A2%E3% 2%A2%E3% 2%A2%E3% 2%A2%E3% 2%A2%E3% 2%A2%EF%BC%88%E4%BB%96%E7%A4%BE%E3%83%A6%E3%83%8B%E3%83%83%E3%83%88%EF%BC%89_KPV_v4.pptx",
+    "Tabuchi_3phase": "https://ergitsol.sharepoint.com/:p:/r/sites/TechnicalSupport/Shared%20Documents/%E8%A8%AD%E3%20%A2%E3%20%A2%E3% 2%A2%E6%A9%9F%E5%99%A8%E8%A8%AD%E7%BD%AE%E6%96%B9%E6%B3%95_Lite_LTE_%E7%94%B0%E6%B7%B5%E9%9B%BB%E6%A9%9F%EF%BC%88%E4%B8%89%E7%9B%B8%EF%BC%89FG_v3.pptx",
+    "Tabuchi_1phase": "https://ergitsol.sharepoint.com/:p:/r/sites/TechnicalSupport/Shared%20Documents/%E8%A8%AD%E3%20%A2%E3%20%A2%E3% 2%A2%E6%A9%9F%E5%99%A8%E8%A8%AD%E7%BD%AE%E6%96%B9%E6%B3%95_Lite_LTE_%E7%94%B0%E6%B7%B5%E9%9B%BB%E6%A9%9F%EF%BC%88%E5%83%85%E7%9B%B8%EF%BC%89_v3.pptx",
+    "Suntech": "https://ergitsol.sharepoint.com/:p:/r/sites/TechnicalSupport/Shared%20Documents/%E8%A8%AD%E3%20%A2%E3%20%A2%E3% 2%A2%E6%A9%9F%E5%99%A8%E8%A8%AD%E7%BD%AE%E6%96%B9%E6%B3%95_Lite_LTE_%EF%BD%BB%EF%BE%9D%EF%BE%83%EF%BD%AF%EF%BD%B8_%EF%BE%8A%EF%BE%9F%EF%BE%85%EF%BD%BF%EF%BE%86%EF%BD%AF%EF%BD%B8_%EF%BE%98%EF%BD%B0%EF%BE%8C%EF%BE%9F%EF%BE%84%EF%BE%9D_%EF%BE%88%EF%BD%B8%EF%BD%BD%EF%BE%84%EF%BD%B4%EF%BE%85%EF%BD%BC%EF%BE%9E%EF%BD%B0.FG_v3.pptx",
     "ABB": "https://ergitsol.sharepoint.com/:p:/r/sites/egypt/Shared%20Documents/Solar%20Monitor/%E5%87%BA%E8%8D%B7%E7%AE%A1%E7%90%86%E8%A1%A8/%E8%A8%AD%E7%BD%AE%E3%20%20%A2%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E6%A9%9F%E5%99%A8%E8%A8%AD%E7%BD%AE%E6%96%B9%E6%B3%95_Lite_LTE_ABB%EF%BC%88%E3%20%20%A4%E3%83%BC%E3%82%B5%E3%83%8D%E3%83%83%E3%83%88%EF%BC%89_%E3%83%97%E3%83%A1%E3%83%A2%E3%83%A1_BOX%E7%84%A1.pptx",
     "IDEC": "https://ergitsol.sharepoint.com/:p:/r/sites/egypt/Shared%20Documents/Solar%20Monitor/%E5%87%BA%E8%8D%B7%E7%AE%A1%E7%90%86%E8%A1%A8/%E8%A8%AD%E7%BD%AE%E3%20%20%A2%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E6%A9%9F%E5%99%A8%E8%A8%AD%E7%BD%AE%E6%96%B9%E6%B3%95_Lite_LTE_IDEC_Pro_BOX%E6%9C%89.pptx",
     "SolarEdge": "https://ergitsol.sharepoint.com/:p:/r/sites/egypt/Shared%20Documents/Solar%20Monitor/%E5%87%BA%E8%8D%B7%E7%AE%A1%E7%90%86%E8%A1%A8/%E8%A8%AD%E7%BD%AE%E3%20%20%A2%E3%20%A2%E3%83%BC%E3%83%A2%E3%83%8B%E6%A9%9F%E5%99%A8%E8%A8%AD%E7%BD%AE%E6%96%B9%E6%B3%95_Lite_LTE_SolarEdge%EF%BC%88%E6%96%B0%E5%1E%8B%E7%95%AA%EF%BC%89_Lite_BOX%E6%9C%89.pptx",
@@ -156,11 +155,11 @@ const masterAlarms = {
         "gf18": { name: "GF18 制御信号異常4", title: "【デルタ】制御フィードバック異常4", text: "【原因】制御信号エラー。【対処】DCスイッチ入れ直し、配線点検。" },
         "gf19": { name: "GF19 制御信号異常5", title: "【デルタ】制御フィードバック異常5", text: "【原因】制御回路異常。【対処】再起動、解消しない場合はメーカーへ。" },
         "gf20": { name: "GF20 変換効率異常", title: "【デルタ】変換効率異常", text: "【原因】内部回路故障による効率異常。【対処】配線確認、直らない場合はメーカー。" },
-        "gf22": { name: "GF22 内部通信異常(2)", title: "【デルタ】内部通信異常(2)", text: "【原因】内部基板間の通信エラー。【対処】配線状態確認、AC/DCスイッチ再投入。" },
+        "gf22": { name: "GF22 内部通信異常(2)", title: "【デルタ】内部通信異常(2)", text: "【原因】内部基板間の通信エラー。【対処}配線状態確認、AC/DCスイッチ再投入。" },
         "gf23": { name: "GF23 内部通信異常(1)", title: "【デルタ】内部通信異常(1)", text: "【原因】内部通信エラー。【対処】AC/DCスイッチ入れ直し、メーカーへ連絡。" },
         "gf24": { name: "GF24 直流地絡の異常", title: "【デルタ】直流地絡の異常", text: "【原因】DC側の漏電・地絡。【対処】入力ストリングの絶縁を測定、漏電箇所特定。" },
         "gf26": { name: "GF26 内部電源異常", title: "【デルタ】内部電源異常", text: "【原因】内部電源回路の故障。【対処】配線状態点検、AC/DC再投入、メーカーへ。" },
-        "gf27": { name: "GF27 直流地絡検出回路異常", title: "【デルタ】地絡検出回路故障", text: "【原因}地絡検出センサー異常。【対処】再起動、改善しない場合はメーカー。" },
+        "gf27": { name: "GF27 直流地絡検出回路異常", title: "【デルタ】地絡検出回路故障", text: "【原因】地絡検出センサー異常。【対処】再起動、改善しない場合はメーカー。" },
         "gf28": { name: "GF28 リレー溶着検出", title: "【デルタ】出力リレー溶着検出", text: "【原因】ACリレーの溶着故障。【対処】配線・系統確認。直らない場合はメーカーへ。" },
         "gf29": { name: "GF29 リレー接続不可", title: "【デルタ】出力リレー動作不良", text: "【原因】リレーが正常接続できない。【対処】配線確認、AC/DC再投入。メーカー連絡。" },
         "gf30": { name: "GF30 入力接続不良", title: "【デルタ】入力配線・接続不良", text: "【原因】DC接続不良、PV絶縁低下。【対処】DCコネクタ確認、太陽電池の絶縁チェック。" },
@@ -216,7 +215,7 @@ const masterAlarms = {
         "f-9030016": { name: "F-9030016 パワコン過負荷 (OL2)", title: "【安川】パワコン過負荷 (OL2)", text: "自立出力負荷の容量過大。接続している電気機器を減らしてください。" },
         "ol2": { name: "パワコン過負荷 (OL2)", title: "【安川】パワコン過負荷 (OL2)", text: "自立出力過負荷（F-9030016）。接続機器を減らして負荷を下げてください。" },
         "f-9030017": { name: "F-9030017 出力過電流1 (OC1)", title: "【安川】出力過電流1 (OC1)", text: "出力過電流。配線ミスやケーブル破損点検。自立時は負荷減少。自動復帰。" },
-        "oc1": { name: "出力過電流1 (OC1)", title: "【安川】出力過電流1 (OC1)", text: "過電流検知。配線・破損の確認。自立時は接続負荷の容量減少（F-9030017）。" },
+        "oc1": { name: "出力過電流1 (OC1)", title: "【安川】出力過電流1 (OC1)", text: "過電流検知.配線・破損の確認。自立時は接続負荷の容量減少（F-9030017）。" },
         "f-9030023": { name: "F-9030023 通信異常 (CE)", title: "【安川】通信異常 (CE)", text: "配線ミス・短絡・断線、通信データ異常。配線点検、主回路・接地線のノイズ対策。" },
         "ce": { name: "通信異常 (CE)", title: "【安川】通信異常 (CE)", text: "通信異常（F-9030023）。配線ミス・短絡・断線の確認、ノイズ対策。" },
         "f-9030027": { name: "F-9030027 直流過電圧 (OVB2)", title: "【安川】直流過電圧 (OVB2)", text: "太陽電池電圧の異常上昇。太陽電池ストリングの配線ミス・直列数過多を確認。" },
@@ -267,7 +266,6 @@ const masterAlarms = {
 
 let selectedRootType = ""; let selectedTarget = ""; let selectedMaker = "";
 
-// ★selectRoot関数を3分岐対応に修正
 function selectRoot(stepNum, type) { 
     let btnText = "";
     if (type === 'triage') btnText = "⚠️ 障害の切り分け (PCS/監視機器)";
@@ -283,11 +281,10 @@ function selectRoot(stepNum, type) {
     } else if (type === 'order') { 
         renderOrderMakerSelection(stepNum + 1); 
     } else if (type === 'control') {
-        renderControlMakerSelection(stepNum + 1); // 出力制御フローの開始
+        renderControlMakerSelection(stepNum + 1); 
     }
 }
 
-// ★新設：出力制御対応可能PCS用のメーカー選択画面
 function renderControlMakerSelection(stepNum) {
     const node = document.createElement('div');
     node.className = 'node';
@@ -300,30 +297,63 @@ function renderControlMakerSelection(stepNum) {
     appendNode(node);
 }
 
-// ★新設：選択したメーカーの対応状況と、SharePointへの参考リンクを表示
+// 🔍 メーカー選択後に型番を「リアルタイム検索」できる機能
 function selectControlMaker(stepNum, maker) {
     highlightButton(maker);
     clearSubsequentSteps(stepNum);
+    selectedMaker = maker; 
+    
     const node = document.createElement('div');
     node.className = 'node';
     
-    let title = `【${maker}】出力制御対応可能PCS`;
-    let content = "";
+    node.innerHTML = `
+        <div class="label">${maker} 出力制御</div>
+        <div class="question">型式（型番）を検索、または一覧から確認してください。</div>
+        <input type="text" class="search-box" id="pcs-search-input" placeholder="型式やキーワードを入力して検索..." oninput="filterControlPcs()">
+        <div class="search-results" id="pcs-search-results" style="max-height: 280px; overflow-y: auto;"></div>
+        <div class="doc-reference" style="margin-top:15px;">
+            <p><strong>元資料:</strong> <a href="https://ergitsol.sharepoint.com/:x:/s/TechnicalSupport/IQB4WUXzD4NIQpFNcWJE7F4mAUCR1B4y1moI_feh7gJelx8?e=rOvE3t" target="_blank" style="background-color:var(--success-color); color:white; padding:6px 12px; border-radius:4px; text-decoration:none;">🔗 エクセル一覧表を開く</a></p>
+        </div>
+    `;
+    appendNode(node);
+    filterControlPcs(); 
+    document.getElementById('reset-btn').style.display = 'block';
+}
+
+function filterControlPcs() {
+    const input = document.getElementById('pcs-search-input').value.toLowerCase().trim();
+    const container = document.getElementById('pcs-search-results');
+    container.innerHTML = '';
     
-    const pcsList = controlPcsData[maker] || [];
+    const pcsList = controlPcsData[selectedMaker] || [];
+    let matchCount = 0;
+    
     if (pcsList.length > 0) {
-        content += `<p style="color:var(--success-color); font-weight:bold;">📋 ツール内登録済みの対応型式一覧：</p><ul class="order-list">`;
+        let ul = document.createElement('ul');
+        ul.className = 'order-list';
+        ul.style.listStyle = 'none';
+        ul.style.paddingLeft = '0';
+        ul.style.margin = '0';
+        
         pcsList.forEach(pcs => {
-            content += `<li>🔳 <strong>${pcs.model}</strong> （${pcs.status} / 備考: ${pcs.note}）</li>`;
+            if (input === '' || pcs.model.toLowerCase().includes(input) || pcs.note.toLowerCase().includes(input)) {
+                matchCount++;
+                let li = document.createElement('li');
+                li.style.padding = '10px 15px';
+                li.style.borderBottom = '1px solid var(--border-color)';
+                li.innerHTML = `🔳 <strong style="color:var(--accent-color);">${pcs.model}</strong> <span style="font-size:0.8rem; margin-left:8px; padding:2px 6px; background:rgba(46,164,79,0.2); color:var(--success-color); border-radius:4px;">${pcs.status}</span><br><span style="font-size:0.85rem; color:#8b949e; display:block; margin-top:4px; margin-left:24px;">備考: ${pcs.note}</span>`;
+                ul.appendChild(li);
+            }
         });
-        content += `</ul>`;
-    } else {
-        content += `<p style="color:var(--warning-color); font-weight:bold;">💡 現在、詳細データを流し込み準備中です。</p><p>お手数ですが、最新の情報は下記リンクのExcel一覧表から直接ご確認ください。</p>`;
+        
+        if (matchCount > 0) {
+            container.appendChild(ul);
+        }
     }
     
-    node.innerHTML = `<div class="label">CONTROL PCS</div><div class="result-box" style="border-left: 4px solid var(--success-color); background-color: rgba(46, 164, 79, 0.1);"><div class="result-title">${title}</div>${content}</div><div class="doc-reference"><p><strong>元資料（SharePoint）:</strong> <a href="https://ergitsol.sharepoint.com/:x:/s/TechnicalSupport/IQB4WUXzD4NIQpFNcWJE7F4mAUCR1B4y1moI_feh7gJelx8?e=rOvE3t" target="_blank" style="background-color:var(--success-color); color:white; padding:6px 12px; border-radius:4px; text-decoration:none;">🔗 エクセル一覧表を開く</a></p></div>`;
-    appendNode(node);
-    document.getElementById('reset-btn').style.display = 'block';
+    if (matchCount === 0) {
+        container.innerHTML = `<div class="no-result">該当する型式が見つかりません（データ未登録）。</div>`;
+    }
 }
 
 function renderOrderMakerSelection(stepNum) { const node = document.createElement('div'); node.className = 'node'; let buttonsHtml = '<div class="grid-buttons">'; orderMakers.forEach(maker => { let displayHtml = maker; if (maker.includes("※Webコネクト必須")) { displayHtml = maker.replace("※Webコネクト必須", '<span style="color: var(--alert-color); font-weight: bold;">※Webコネクト必須</span>'); } buttonsHtml += `<button onclick="selectOrderMaker(${stepNum}, '${maker}')">${displayHtml}</button>`; }); buttonsHtml += '</div>'; node.innerHTML = `<div class="label">機器手配: STEP 1</div><div class="question">手配メーカーを選択。</div>${buttonsHtml}`; appendNode(node); }
